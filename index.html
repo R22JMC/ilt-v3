@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Irish Landmark Trust — v3 Full Site</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" href="https://use.typekit.net/vje6fkm.css">
+<link href="src/v3/styles.css" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="src/data.js"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="src/v3/shell.jsx"></script>
+<script type="text/babel" src="src/v3/home.jsx"></script>
+<script type="text/babel" src="src/v3/pages-a.jsx"></script>
+<script type="text/babel" src="src/v3/pages-b.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+// ─── Hash router ─────────────────────────────────────────────────────────────
+// URL pattern:  #/page            (e.g. #/properties)
+//               #/page/slug       (e.g. #/category/lighthouses)
+// The slug populates the appropriate param key per route.
+const PARAM_KEY = {
+  category: 'categoryId',
+  multi:    'parentId',
+  property: 'id',
+  project:  'projectId',
+  story:    'slug',
+};
+
+function hashToRoute(hash) {
+  const path = (hash || '').replace(/^#\/?/, '');
+  if (!path) return { page: 'home', params: {} };
+  const [page, slug] = path.split('/');
+  const key = PARAM_KEY[page];
+  const params = key && slug ? { [key]: decodeURIComponent(slug) } : {};
+  return { page, params };
+}
+function routeToHash({ page, params }) {
+  if (page === 'home') return '#/';
+  const key = PARAM_KEY[page];
+  const slug = key ? params[key] : '';
+  return slug ? `#/${page}/${encodeURIComponent(slug)}` : `#/${page}`;
+}
+
+function App() {
+  const [route, setRoute] = React.useState(() => hashToRoute(window.location.hash));
+
+  // Listen for browser back/forward + manual hash changes
+  React.useEffect(() => {
+    const onHash = () => setRoute(hashToRoute(window.location.hash));
+    window.addEventListener('hashchange', onHash);
+    // Normalise a bare '#' or empty hash on first load
+    if (!window.location.hash) window.history.replaceState(null, '', '#/');
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  React.useEffect(() => { window.scrollTo({top:0, behavior:'instant'}); }, [route]);
+
+  const setPage = (page, params = {}) => {
+    const nextHash = routeToHash({ page, params });
+    if (window.location.hash === nextHash) {
+      setRoute({ page, params });               // same URL → still re-render
+    } else {
+      window.location.hash = nextHash;          // triggers hashchange → setRoute
+    }
+  };
+  const openProp = (id) => setPage('property', { id });
+
+  const isHome = route.page === 'home';
+  const headerTransparent = isHome;
+
+  const pages = {
+    home: <HomeV3 setPage={setPage} openProp={openProp}/>,
+    properties: <PropertiesPageV3 setPage={setPage} openProp={openProp}/>,
+    categories: <CategoriesIndexV3 setPage={setPage}/>,
+    category: <CategoryPageV3 categoryId={route.params.categoryId} setPage={setPage} openProp={openProp}/>,
+    multi: <MultiPageV3 parentId={route.params.parentId} setPage={setPage} openProp={openProp}/>,
+    property: <PropertyDetailV3 id={route.params.id} setPage={setPage} openProp={openProp}/>,
+    availability: <AvailabilityPageV3 setPage={setPage} openProp={openProp}/>,
+    stay: <YourStayV3 setPage={setPage}/>,
+    faqs: <FAQsPageV3/>,
+    projects: <ProjectsPageV3 setPage={setPage}/>,
+    project: <ProjectDetailV3 projectId={route.params.projectId} setPage={setPage}/>,
+    about: <AboutPageV3 setPage={setPage}/>,
+    team: <TeamPageV3/>,
+    governance: <GovernancePageV3/>,
+    donate: <DonatePageV3 setPage={setPage}/>,
+    gift: <GiftPageV3/>,
+    contact: <ContactPageV3/>,
+    stories: <StoriesPageV3 setPage={setPage}/>,
+    story: <StoryDetailV3 slug={route.params.slug} setPage={setPage}/>,
+    learn: <LearnPageV3/>,
+  };
+
+  const key = route.page + JSON.stringify(route.params);
+
+  return (
+    <div data-screen-label={'ILT v3 · ' + route.page}>
+      <Preloader/>
+      <HeaderV3 setPage={setPage} openProp={openProp} transparent={headerTransparent}/>
+      <main key={key}>{pages[route.page] || pages.home}</main>
+      <FooterV3 setPage={setPage}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
