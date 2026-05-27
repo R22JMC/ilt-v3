@@ -93,13 +93,16 @@ function FaqItem({ q, children }) {
 }
 
 // ─── Page top hero ──────────────────────────────────────────────────────────
-function PageTop({ crumb, eyebrow, title, lede, dark = false, action }) {
+function PageTop({ crumb, eyebrow, title, lede, dark = false, action, bgImage }) {
+  const hero = !!bgImage;
+  const cls = hero ? 'page-top page-top--hero' : 'page-top ' + (dark ? 'page-top--dark' : 'page-top--cream');
   return (
-    <section className={'page-top ' + (dark ? 'page-top--dark' : 'page-top--cream')}>
+    <section className={cls}>
+      {hero && <><img className="page-top__bg" src={bgImage} alt=""/><div className="page-top__shade"/></>}
       <div className="wrap page-top__inner">
         <div className="page-top__text">
           {crumb && <div className="crumb">{crumb}</div>}
-          <div className="eyebrow" style={{color: dark ? 'var(--mint)' : 'var(--terracotta)'}}>{eyebrow}</div>
+          <div className="eyebrow" style={{color: (dark||hero) ? 'var(--mint)' : 'var(--terracotta)'}}>{eyebrow}</div>
           <h1>{title}</h1>
           {lede && <p className="page-top__lede">{lede}</p>}
         </div>
@@ -159,10 +162,10 @@ function PropertiesPageV3({ setPage, openProp }) {
 
   return (
     <div>
-      <PageTop crumb="Explore & Stay" eyebrow="All Properties · Filters"
+      <PageTop bgImage="assets/stays/p2.jpg" eyebrow="All Properties"
         title={<>Every <em className="di">Landmark</em>.</>}
-        lede="33 restored buildings across the island — filtered the way you travel."
-        action={<a className="btn btn--ghost btn--sm" onClick={()=>setShowMap(s=>!s)}>{showMap ? 'Hide map' : 'View on map'} <span className="arr">→</span></a>}/>
+        lede="33 restored buildings across the island."
+        action={<a className="btn btn--ghost-w btn--sm" onClick={()=>setShowMap(s=>!s)}>{showMap ? 'Hide map' : 'View on map'} <span className="arr">→</span></a>}/>
 
       {/* Map row (toggled by "View on map") */}
       {showMap && (
@@ -249,7 +252,7 @@ function PropertiesPageV3({ setPage, openProp }) {
                   <div className="prop__body">
                     <div className="prop__row"><h3 className="prop__name">{p.name}</h3></div>
                     <div className="prop__loc">{p.location}</div>
-                    <p style={{fontFamily:'TT Norms Pro', fontSize:14, lineHeight:1.6, color:'var(--ink-soft)', marginTop:14, maxWidth:560}}>{p.blurb || 'A unique heritage stay, restored and let self-catering by the Trust.'}</p>
+                    <p style={{fontFamily:'TT Norms Pro', fontSize:14, lineHeight:1.6, color:'var(--ink-soft)', marginTop:14, maxWidth:560}}>{p.blurb || 'A unique heritage stay, restored and let self-catering by the Irish Landmark Trust.'}</p>
                     <div className="prop__meta"><span>Sleeps {p.sleeps}</span><span>{p.bedrooms} beds</span>{p.dog && <span>Dog-friendly</span>}</div>
                   </div>
                   <div style={{padding:'28px 32px', textAlign:'right', display:'flex', flexDirection:'column', justifyContent:'space-between', alignItems:'flex-end'}}>
@@ -303,7 +306,7 @@ function CategoryPageV3({ categoryId='lighthouses', setPage, openProp }) {
                 Our {cat.name.toLowerCase()} collection brings together {list.length} properties that share a particular character.
               </p>
               <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:0}}>
-                Curated by our Bookings Office and House Managers. Each building has been fully restored and is let self-catering, with revenue feeding directly into the next rescue.
+                Curated by our Bookings Office and House Managers. Each building has been fully restored and is let self-catering, with revenue feeding directly into the next building we save.
               </p>
             </div>
           </div>
@@ -387,19 +390,30 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
 
   return (
     <div>
-      {/* Crumb */}
-      <div style={{padding:'100px 0 18px', background:'var(--cream)'}}>
-        <div className="wrap">
-          <div className="crumb">
-            <a onClick={()=>setPage('properties')}>← All properties</a>
+      {/* Fullscreen hero with title + badges */}
+      <section className="prop-hero">
+        <img className="prop-hero__img" src={pick(p.id, 0)} alt={p.name}/>
+        <div className="prop-hero__shade"/>
+        <div className="wrap prop-hero__inner">
+          <div className="crumb prop-hero__crumb">
+            <a onClick={()=>setPage('properties')}>All properties</a>
             {p.parent && <> / <a onClick={()=>setPage('multi',{parentId:p.parent})}>{p.parentName}</a></>}
-            {' / '}<span style={{color:'var(--green-deep)'}}>{p.name}</span>
+            {' / '}{p.name}
+          </div>
+          <h1 className="prop-hero__title">{p.name}</h1>
+          <div className="prop-hero__badges">
+            <span>{p.tag}</span>
+            <span>{p.location}</span>
+            <span>Sleeps {p.sleeps}</span>
+            <span>{p.bedrooms} bedroom{p.bedrooms>1?'s':''}</span>
+            <span>from {window.ILT_CUR(p)}{p.from}</span>
+            {p.dog && <span className="is-dog">Dog friendly</span>}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Gallery */}
-      <section style={{padding:'8px 0 40px', background:'var(--cream)'}}>
+      {/* Gallery strip */}
+      <section style={{padding:'40px 0 0', background:'var(--cream)'}}>
         <div className="wrap">
           <div className="pd-gallery">
             <img src={pick(p.id, 0)} alt={p.name}/>
@@ -414,18 +428,21 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
       <section style={{padding:'40px 0 120px', background:'var(--cream)'}}>
         <div className="wrap pd-main">
           <div>
-            <div className="eyebrow" style={{color:'var(--terracotta)'}}>{p.tag} · {p.location}</div>
-            <h1 className="display" style={{fontSize:64, fontWeight:400, margin:'14px 0 16px', letterSpacing:'-.015em'}}>{p.name}</h1>
-            <p style={{fontFamily:'meno-banner', fontWeight: 400, fontSize:22, lineHeight:1.55, color:'var(--ink-soft)', margin:'0 0 12px', maxWidth:680}}>{p.blurb || `A ${p.tag.toLowerCase()} restored and let by the Irish Landmark Trust, sleeping ${p.sleeps} in ${p.bedrooms} bedrooms.`}</p>
+            <p style={{fontFamily:'meno-banner', fontWeight: 400, fontSize:22, lineHeight:1.55, color:'var(--ink-soft)', margin:'0 0 28px', maxWidth:680}}>{p.blurb || `A ${p.tag.toLowerCase()} restored and let by the Irish Landmark Trust, sleeping ${p.sleeps} in ${p.bedrooms} bedrooms.`}</p>
 
-            <div className="pd-quick">
-              {[['Sleeps',p.sleeps],['Bedrooms',p.bedrooms],['Min stay','2 nights'],['Dogs',p.dog?'Yes — 1 only':'No']].map(([l,v])=>(
-                <div key={l}><div className="l">{l}</div><div className="v">{v}</div></div>
-              ))}
+            {/* Things you should know */}
+            <div className="pd-tysk">
+              <h3>Things you should know</h3>
+              <ul>
+                <li>Minimum stay: 2 nights (longer over peak dates)</li>
+                <li>Self-catering — linen, towels and a welcome basket provided</li>
+                {p.dog && <li><strong>Dog-friendly</strong> — one well-behaved dog welcome</li>}
+                <li>Met on arrival by your local House Manager</li>
+              </ul>
             </div>
 
             <div className="tabs">
-              {[['about','About'],['amenities','Amenities'],['itinerary','Itinerary'],['reviews','Reviews'],['history','House History'],['faqs','Property FAQs']].map(([k,l])=>(
+              {[['about','About'],['amenities','Amenities'],['itinerary','Itinerary'],['reviews','Reviews'],['history','History'],['faqs','Property FAQs']].map(([k,l])=>(
                 <button key={k} className={'tab '+(tab===k?'is-active':'')} onClick={()=>setTab(k)}>{l}</button>
               ))}
             </div>
@@ -502,9 +519,9 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
               <div>
                 <div className="eyebrow" style={{color:'var(--sage)'}}>Your House Manager</div>
                 <div style={{fontFamily:'Joane Stencil', fontSize:22, fontWeight:500, marginTop:4}}>Siobhán Murphy</div>
-                <div style={{fontFamily:'TT Norms Pro', fontSize:13, color:'var(--ink-soft)', marginTop:2}}>Lives 6km away · meets guests on arrival · cares for this building.</div>
+                <div style={{fontFamily:'TT Norms Pro', fontSize:14, lineHeight:1.6, color:'var(--ink-soft)', marginTop:6, maxWidth:560}}>Siobhán has looked after this building for nine years. She lives nearby, meets every guest on arrival, and knows the headland better than anyone — ask her where to find the best swim.</div>
               </div>
-              <a className="btn btn--ghost btn--sm">Contact</a>
+              <a className="btn btn--ghost btn--sm" onClick={()=>setPage('team')}>Meet the team →</a>
             </div>
           </div>
 

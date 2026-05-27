@@ -30,7 +30,7 @@ function HomeV3({ setPage, openProp }) {
               <span className="hero__line"><span>Educating <em className="di">and Inspiring</em></span></span>
               <span className="hero__line"><span>one guest at a time.</span></span>
             </h1>
-            <p className="hero__lede">Lighthouses, gate lodges, schoolhouses and keepers' cottages — restored, self-catering, and let as holidays to fund the next rescue.</p>
+            <p className="hero__lede">Lighthouses, gate lodges, schoolhouses and keepers' cottages — restored, self-catering, and let as holidays to fund the next building we save.</p>
 
             <div className="search">
               <div className="search__cell"><div className="l">Dates</div><div className="v">Check in → Check out</div></div>
@@ -64,7 +64,7 @@ function HomeV3({ setPage, openProp }) {
         <div className="trust__track">
           {[0,1].map(dup => (
             <div className="trust__group" key={dup} aria-hidden={dup===1}>
-              {['33 unique properties','34 years of restoration','All-island charity (ROI & NI)','Traditional crafts, local makers','Every stay funds the next rescue'].map((t,i)=>(
+              {['33 unique properties','34 years of restoration','All-island charity (ROI & NI)','Traditional crafts, local makers','Every stay funds the next building we save'].map((t,i)=>(
                 <span className="trust__item" key={i}>{t}</span>
               ))}
             </div>
@@ -72,34 +72,24 @@ function HomeV3({ setPage, openProp }) {
         </div>
       </section>
 
-      {/* PILLARS */}
-      <section className="section">
+      {/* PILLARS — expanding image panels, minimal text */}
+      <section className="section section--pillars">
         <div className="wrap">
-          <div className="intro">
-            <div></div>
-            <div>
-              <h2 className="display">Browse, support, or simply <em className="di">get to know us</em>.</h2>
-              <p className="intro__sub">We're a charity that runs as a holiday-let business — so the website does both jobs. Find the way in that fits why you're here.</p>
-            </div>
-          </div>
           <div className="pillars">
             {[
-              ['01','Pillar one','Explore','& Stay','33 properties across the island. Browse by map, by category, or jump straight to availability. Every booking funds restoration.','See all properties →','properties','assets/hero-lighthouse.jpg','assets/video/explore.mp4'],
-              ['02','Pillar two','Support','& Learn','Follow Saunderscourt, our flagship current project. Donate, volunteer, or sign up for our heritage skills programme.','See current projects →','projects','assets/img-6.jpg','assets/video/support.mp4'],
-              ['03','Pillar three','About','us','Thirty-four years of saving what was nearly lost. Meet the team, read our governance, and see where the money goes.','Our story →','about','assets/img-5.jpg','assets/video/about.mp4'],
-            ].map(([n,e,t,et,c,l,page,poster,video])=>(
-              <a key={n} className="pillar" onClick={()=>setPage(page)}
+              ['Our Properties','See all properties →','properties','assets/hero-lighthouse.jpg','assets/video/explore.mp4'],
+              ['Our Projects','See current projects →','projects','assets/img-6.jpg','assets/video/support.mp4'],
+              ['Our Story','Read our story →','about','assets/img-5.jpg','assets/video/about.mp4'],
+            ].map(([t,l,page,poster,video])=>(
+              <a key={t} className="pillar" onClick={()=>setPage(page)}
                 onMouseEnter={ev => { const v = ev.currentTarget.querySelector('video'); if (v) v.play().catch(()=>{}); }}
                 onMouseLeave={ev => { const v = ev.currentTarget.querySelector('video'); if (v) { v.pause(); } }}>
                 <video className="pillar__video" poster={poster} muted loop playsInline preload="none">
                   <source src={video} type="video/mp4"/>
                 </video>
                 <div className="pillar__overlay"/>
-                <div className="pillar__num">{n}</div>
                 <div className="pillar__content">
-                  <div className="eyebrow pillar__eyebrow">{e}</div>
-                  <h3>{t} <em className="di">{et}</em></h3>
-                  <p>{c}</p>
+                  <h3>{t}</h3>
                   <span className="pillar__link">{l}</span>
                 </div>
               </a>
@@ -122,12 +112,11 @@ function HomeV3({ setPage, openProp }) {
         </svg>
         <div className="wrap">
           <div className="labour__copy">
-            <div className="eyebrow" style={{color:'var(--green)'}}>A labour of love</div>
-            <h2 className="display">Behind every <em className="di">great building</em>, a great story.</h2>
-            <p className="lead">As an educational charity we are passionate about knowledge-sharing with our community of heritage enthusiasts and guests.</p>
-            <p>Our ability to restore heritage buildings depends on the survival of traditional craft skills and the people who carry them. Every stay you take helps keep both alive — and gives the next building a future.</p>
+            <h2 className="display">Learning is at the heart of what we do.</h2>
+            <p className="lead">As an educational charity we are passionate about sharing knowledge with our community of heritage enthusiasts and guests.</p>
+            <p>Restoring heritage buildings depends on the survival of traditional craft skills and the people who carry them. Our learning programme — apprenticeships, open days and seminars — helps keep those skills alive.</p>
             <div style={{display:'flex', gap:14, marginTop:36}}>
-              <a className="btn btn--dark" onClick={()=>setPage('about')}>Our history <span className="arr">→</span></a>
+              <a className="btn btn--dark" onClick={()=>setPage('learn')}>Our learning programme <span className="arr">→</span></a>
               <a className="btn btn--ghost" onClick={()=>setPage('about')}>How we work</a>
             </div>
           </div>
@@ -271,7 +260,7 @@ function HomeV3({ setPage, openProp }) {
           <div className="gift__body">
             <div className="eyebrow" style={{color:'var(--terracotta)'}}>Gift Vouchers</div>
             <h2 className="display">A stay, <em className="di">wrapped</em>.</h2>
-            <p>Give a night in a lighthouse, or a week in a gate lodge — a present that makes memories and funds the next rescue. Choose an amount, or let them pick the place.</p>
+            <p>Give a night in a lighthouse, or a week in a gate lodge — a present that makes memories and funds the next building we save. Choose an amount, or let them pick the place.</p>
             <div className="gift__amounts">
               {['€100','€250','€500','Any amount'].map((a,i)=>(
                 <button key={a} className={'gift__chip'+(i===1?' is-active':'')} onClick={()=>setPage('gift')}>{a}</button>

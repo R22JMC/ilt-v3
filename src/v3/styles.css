@@ -83,7 +83,18 @@ input, textarea, select { font-family:inherit; }
 
 /* Typography utilities */
 .display { font-family:"Joane Stencil", "Joane Stencil", serif; font-weight:400; letter-spacing:-0.02em; line-height:0.98; }
-.display em, .di { font-family:"Joane Stencil", "Joane Stencil", serif; font-weight:300; font-weight:300; letter-spacing:-0.025em; }
+/* Milestone 2: single-tone headings (drop the light two-tone "italic" accent on big display type) */
+.display em, .di { font-family:"Joane Stencil", "Joane Stencil", serif; font-weight:400; letter-spacing:-0.02em; font-style:normal; }
+
+/* Milestone 2: remove superfluous micro-headings above main headings */
+.page-top .eyebrow,
+.intro .eyebrow,
+.labour__copy .eyebrow,
+.mission .eyebrow,
+.stories .eyebrow,
+.gift .eyebrow,
+.donateband .eyebrow,
+.newsband .eyebrow { display:none; }
 .eyebrow { font-family:"TT Norms Pro", sans-serif; font-size:12px; letter-spacing:.28em; text-transform:uppercase; font-weight:500; }
 .mono { font-family:"TT Norms Pro", sans-serif; }
 
@@ -349,14 +360,14 @@ input, textarea, select { font-family:inherit; }
 }
 
 /* Trust strip — scrolling marquee in Joane */
-.trust { background: var(--mint); color: var(--green-deep); padding: 26px 0; overflow: hidden; }
+.trust { background: var(--mint); color: var(--green-deep); padding: 16px 0; overflow: hidden; }
 .trust__track { display: flex; width: max-content; animation: trust-scroll 45s linear infinite; }
 .trust__group { display: flex; align-items: center; flex-shrink: 0; }
 .trust__item {
-  display: inline-flex; align-items: center; padding-right: 72px;
+  display: inline-flex; align-items: center; padding-right: 56px;
   font-family: "Joane Stencil"; font-weight: 400;
-  font-size: clamp(1.5rem, 1rem + 1.8vw, 2.375rem); /* ~24 → 38px */
-  letter-spacing: -.01em; line-height: 1; white-space: nowrap;
+  font-size: clamp(1rem, .85rem + .5vw, 1.375rem); /* ~16 → 22px — smaller, calmer */
+  letter-spacing: -.005em; line-height: 1; white-space: nowrap;
 }
 @keyframes trust-scroll {
   from { transform: translateX(0); }
@@ -377,8 +388,8 @@ input, textarea, select { font-family:inherit; }
 .pillars { display:flex; gap:24px; align-items:stretch; }
 .pillar {
   flex: 1 1 0; min-width: 0;
-  background:var(--cream-warm);
-  padding:48px 44px 44px; min-height:440px;
+  background:var(--green-deep);
+  padding:48px 44px 44px; min-height:520px;
   display:flex; flex-direction:column;
   position:relative; overflow:hidden;
   transition: flex-grow .55s var(--ease-out);
@@ -386,41 +397,26 @@ input, textarea, select { font-family:inherit; }
 }
 .pillar:hover { flex-grow: 2.4; }
 
-/* Video background — hidden by default, fades + Ken-Burns drift on hover */
+/* Image/video background — always visible; Ken-Burns drift on hover */
 .pillar__video {
   position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-  opacity:0; transform: scale(1.06); z-index:0;
-  transition: opacity .6s ease, transform 7s ease;
+  opacity:1; transform: scale(1.04); z-index:0;
+  transition: transform 7s ease;
 }
-.pillar:hover .pillar__video { opacity:1; transform: scale(1.14); }
+.pillar:hover .pillar__video { transform: scale(1.12); }
 
-/* Dark-green overlay so text stays legible over video */
+/* Dark-green overlay so the title stays legible over the image */
 .pillar__overlay {
   position:absolute; inset:0; z-index:1; pointer-events:none;
-  background: linear-gradient(180deg, rgba(26,60,52,.62) 0%, rgba(26,60,52,.84) 100%);
-  opacity:0; transition: opacity .6s ease;
+  background: linear-gradient(180deg, rgba(26,60,52,.15) 0%, rgba(26,60,52,.45) 55%, rgba(26,60,52,.85) 100%);
+  transition: background .5s ease;
 }
-.pillar:hover .pillar__overlay { opacity:1; }
+.pillar:hover .pillar__overlay { background: linear-gradient(180deg, rgba(26,60,52,.3) 0%, rgba(26,60,52,.6) 55%, rgba(26,60,52,.9) 100%); }
 
-.pillar__content { position:relative; z-index:2; display:flex; flex-direction:column; flex:1; }
-.pillar__num {
-  font-family:"Joane Stencil"; font-weight:300; font-size:80px; color:var(--sage);
-  line-height:.9; position:absolute; right:36px; top:32px; opacity:.4; z-index:2;
-  transition: color .45s ease, opacity .45s ease;
-}
-.pillar__eyebrow { color: var(--terracotta); transition: color .4s ease; }
-.pillar h3 { font-family:"Joane Stencil"; font-size: var(--fs-h3); line-height:1.05; font-weight:400; margin:16px 0 14px; letter-spacing:-.01em; transition: color .4s ease; }
-.pillar h3 em { font-weight:300; color:var(--green); transition: color .4s ease; }
-.pillar p { font-family:"TT Norms Pro"; font-size: var(--fs-body); line-height:1.65; color:var(--ink-soft); margin:0 0 28px; flex:1; transition: color .4s ease; }
-.pillar__link { font-family:"TT Norms Pro"; font-size:14px; font-weight:600; color:var(--green-deep); border-bottom:1px solid var(--green-deep); padding-bottom:3px; align-self:flex-start; letter-spacing:.02em; transition: color .3s ease, border-color .3s ease, padding-left .25s var(--ease-out); }
-
-/* Hover — switch text to light over the dark-green video overlay */
-.pillar:hover .pillar__num { color: rgba(251,248,246,.3); opacity:1; }
-.pillar:hover .pillar__eyebrow { color: var(--mint); }
-.pillar:hover h3 { color: var(--cream); }
-.pillar:hover h3 em { color: var(--mint); }
-.pillar:hover p { color: rgba(251,248,246,.92); }
-.pillar:hover .pillar__link { color: var(--cream); border-color: var(--cream); padding-left: 6px; }
+.pillar__content { position:relative; z-index:2; display:flex; flex-direction:column; justify-content:flex-end; flex:1; }
+.pillar h3 { font-family:"Joane Stencil"; font-size:38px; line-height:1.02; font-weight:400; margin:0 0 14px; letter-spacing:-.01em; color:var(--cream); }
+.pillar__link { font-family:"TT Norms Pro"; font-size:14px; font-weight:600; color:var(--cream); border-bottom:1px solid var(--cream); padding-bottom:3px; align-self:flex-start; letter-spacing:.02em; transition: padding-left .25s var(--ease-out); }
+.pillar:hover .pillar__link { padding-left: 6px; }
 
 /* Labour / mission teaser */
 .labour { background: var(--mint-soft); padding: 160px 0; position:relative; overflow:hidden; }
@@ -592,6 +588,27 @@ footer.f { background: var(--green-deep); color: var(--cream); padding: 90px 0 1
 .f__support { background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); padding:26px 28px; align-self:start; }
 .f__support h5 { font-family:"Joane Stencil"; font-weight:400; font-size:24px; margin:0 0 10px; color:var(--cream); }
 .f__support p { font-family:"TT Norms Pro"; font-size:14px; line-height:1.6; opacity:.8; margin:0 0 18px; }
+/* Donor recognition — three font-size tiers, no amounts/categories */
+.donor-tiers { display:grid; gap:18px; }
+.donor-tier { font-family:"Joane Stencil"; font-weight:400; color:var(--green-deep); line-height:1.3; margin:0; }
+.donor-tier--1 { font-size:26px; }
+.donor-tier--2 { font-size:19px; color:var(--ink-soft); }
+.donor-tier--3 { font-family:"TT Norms Pro"; font-size:14px; line-height:1.6; color:var(--sage); }
+
+/* Donate page — current-project callout card */
+.donate-project { display:grid; grid-template-columns:120px 1fr; gap:20px; align-items:center; margin-top:32px; max-width:520px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); padding:16px; cursor:pointer; transition:background .2s ease; }
+.donate-project:hover { background:rgba(255,255,255,.1); }
+.donate-project__img { aspect-ratio:1/1; overflow:hidden; }
+.donate-project__img img { width:100%; height:100%; object-fit:cover; }
+.donate-project__body h3 { font-family:"Joane Stencil"; font-weight:400; font-size:22px; margin:6px 0 10px; color:var(--cream); }
+.donate-project__bar { height:5px; background:rgba(255,255,255,.15); overflow:hidden; margin-bottom:12px; }
+.donate-project__bar span { display:block; height:100%; background:var(--terracotta); }
+.donate-project__link { font-family:"TT Norms Pro"; font-size:13px; font-weight:600; color:var(--cream); border-bottom:1px solid var(--cream); padding-bottom:2px; }
+
+/* Heritage Council funder slot (replace text with their logo asset) */
+.f__funder { display:flex; align-items:center; gap:18px; padding:24px 0 0; }
+.f__funder-label { font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.18em; text-transform:uppercase; opacity:.55; }
+.f__funder-logo { font-family:"TT Norms Pro"; font-size:13px; font-weight:500; color:var(--cream); border:1px solid rgba(255,255,255,.25); padding:10px 16px; }
 .f__bottom { display:flex; justify-content:space-between; align-items:center; padding:24px 0 36px; font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.14em; text-transform:uppercase; opacity:.6; }
 .f__bottom a { cursor:pointer; }
 .socials { display:flex; gap:18px; }
@@ -633,6 +650,13 @@ footer.f { background: var(--green-deep); color: var(--cream); padding: 90px 0 1
 .page-top--dark { background: var(--green-deep); color:var(--cream); border-bottom:none; }
 .page-top--dark .crumb a { color:var(--mint); }
 .page-top--cream { background: var(--cream); }
+/* Hero page-top with full-bleed background image */
+.page-top--hero { position:relative; overflow:hidden; border-bottom:none; color:var(--cream); min-height: clamp(420px, 52vh, 560px); display:flex; align-items:flex-end; padding: 150px 0 56px; }
+.page-top--hero .page-top__bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
+.page-top--hero .page-top__shade { position:absolute; inset:0; z-index:1; background:linear-gradient(180deg, rgba(26,60,52,.3) 0%, rgba(26,60,52,.25) 45%, rgba(26,60,52,.8) 100%); }
+.page-top--hero .page-top__inner { position:relative; z-index:2; }
+.page-top--hero h1 { color:var(--cream); }
+.page-top--hero .page-top__lede { color:rgba(251,248,246,.92); }
 .page-top h1 { font-family:"Joane Stencil"; font-size: var(--fs-display-xl); line-height:.98; font-weight:400; margin:14px 0 18px; letter-spacing:-.02em; }
 .page-top h1 em { font-weight:300; font-weight:300; }
 .page-top__lede { font-family: var(--font-serif); font-weight:400; font-style:normal; font-size: var(--fs-lede); line-height:1.45; max-width:720px; margin:0; opacity:.88; }
@@ -693,6 +717,26 @@ footer.f { background: var(--green-deep); color: var(--cream); padding: 90px 0 1
 .pd-gallery { display:grid; grid-template-columns:2fr 1fr 1fr; grid-template-rows: 240px 240px; gap:8px; }
 .pd-gallery > *:first-child { grid-row: 1 / 3; }
 .pd-gallery img { width:100%; height:100%; object-fit:cover; border-radius:6px; }
+/* Property fullscreen hero */
+.prop-hero { position:relative; min-height: clamp(440px, 56vh, 620px); overflow:hidden; display:flex; align-items:flex-end; background:var(--green-deep); }
+.prop-hero__img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.prop-hero__shade { position:absolute; inset:0; background:linear-gradient(180deg, rgba(26,60,52,.25) 0%, rgba(26,60,52,.2) 40%, rgba(26,60,52,.85) 100%); }
+.prop-hero__inner { position:relative; z-index:2; color:var(--cream); padding:0 0 48px; }
+.prop-hero__crumb { color:rgba(251,248,246,.8); margin-bottom:16px; }
+.prop-hero__crumb a { cursor:pointer; } .prop-hero__crumb a:hover { color:var(--cream); }
+.prop-hero__title { font-family:"Joane Stencil"; font-weight:400; font-size: clamp(2.5rem, 1.6rem + 4vw, 5rem); line-height:1; letter-spacing:-.02em; margin:0 0 20px; }
+.prop-hero__badges { display:flex; flex-wrap:wrap; gap:10px; }
+.prop-hero__badges span { font-family:"TT Norms Pro"; font-size:13px; letter-spacing:.04em; padding:8px 14px; border:1px solid rgba(251,248,246,.4); }
+.prop-hero__badges .is-dog { background:var(--terracotta); border-color:var(--terracotta); }
+
+/* Things you should know */
+.pd-tysk { margin:0 0 36px; padding:24px 0 28px; border-top:1px solid var(--line-warm); border-bottom:1px solid var(--line-warm); }
+.pd-tysk h3 { font-family:"Joane Stencil"; font-size:24px; font-weight:400; margin:0 0 14px; }
+.pd-tysk ul { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+.pd-tysk li { font-family:"TT Norms Pro"; font-size:15px; line-height:1.5; color:var(--ink-soft); padding-left:20px; position:relative; }
+.pd-tysk li::before { content:''; position:absolute; left:4px; top:.6em; width:6px; height:6px; background:var(--terracotta); }
+.pd-tysk li strong { color:var(--green-deep); }
+
 .pd-main { display:grid; grid-template-columns: 1fr 380px; gap:72px; }
 .pd-quick { display:flex; gap:32px; padding:24px 0; border-bottom:1px solid var(--line-warm); margin:32px 0; }
 .pd-quick > div .l { font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage); }
