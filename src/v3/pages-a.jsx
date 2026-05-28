@@ -79,6 +79,25 @@ function BookingCalendar({ propId, name, onBook }) {
   );
 }
 
+// ─── Interactive location map (OpenStreetMap embed, pinned) ─────────────────
+function PropMap({ p }) {
+  if (!p.coords) return null;
+  const [lat, lng] = p.coords;
+  const d = 0.06; // bbox padding in degrees
+  const bbox = `${(lng-d).toFixed(4)},${(lat-d).toFixed(4)},${(lng+d).toFixed(4)},${(lat+d).toFixed(4)}`;
+  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+  const big = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=13/${lat}/${lng}`;
+  return (
+    <div className="prop-map">
+      <div className="prop-map__head">Location <span>{p.location}</span></div>
+      <div className="prop-map__frame">
+        <iframe title={`Map of ${p.name}`} src={src} loading="lazy" style={{border:0}}></iframe>
+      </div>
+      <a className="prop-map__link" href={big} target="_blank" rel="noopener">Open larger map →</a>
+    </div>
+  );
+}
+
 // ─── FAQ accordion item (smooth height animation, rule divider) ─────────────
 function FaqItem({ q, children }) {
   const [open, setOpen] = uS(false);
@@ -538,6 +557,7 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
               <a onClick={()=>setPage('stay')} style={{textDecoration:'underline'}}>How to book</a> · <a onClick={()=>setPage('faqs')} style={{textDecoration:'underline'}}>FAQs</a><br/>
               <a onClick={()=>setPage('stay')} style={{textDecoration:'underline'}}>Booking conditions</a> · <a onClick={()=>setPage('gift')} style={{textDecoration:'underline'}}>Use a gift voucher</a>
             </div>
+            <PropMap p={p}/>
           </aside>
         </div>
       </section>
