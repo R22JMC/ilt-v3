@@ -79,6 +79,35 @@ function BookingCalendar({ propId, name, onBook }) {
   );
 }
 
+// ─── Interactive location map — Leaflet + clean 2-colour CARTO tiles ────────
+function PropMap({ p }) {
+  const ref = React.useRef(null);
+  const [lat, lng] = p.coords || [];
+  React.useEffect(() => {
+    if (!p.coords || !window.L || !ref.current) return;
+    const map = window.L.map(ref.current, { scrollWheelZoom:false, attributionControl:false }).setView([lat, lng], 11);
+    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19, subdomains: 'abcd',
+    }).addTo(map);
+    // Brand-green circular pin
+    window.L.marker([lat, lng], {
+      icon: window.L.divIcon({ className:'prop-pin', html:'<span></span>', iconSize:[18,18], iconAnchor:[9,9] })
+    }).addTo(map);
+    map.getContainer().addEventListener('click', () => map.scrollWheelZoom.enable());
+    return () => map.remove();
+  }, [p.id]);
+
+  if (!p.coords) return null;
+  const big = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=13/${lat}/${lng}`;
+  return (
+    <div className="prop-map">
+      <div className="prop-map__head">Location <span>{p.location}</span></div>
+      <div className="prop-map__frame" ref={ref}></div>
+      <a className="prop-map__link" href={big} target="_blank" rel="noopener">Open larger map →</a>
+    </div>
+  );
+}
+
 // ─── FAQ accordion item (smooth height animation, rule divider) ─────────────
 function FaqItem({ q, children }) {
   const [open, setOpen] = uS(false);
@@ -93,13 +122,16 @@ function FaqItem({ q, children }) {
 }
 
 // ─── Page top hero ──────────────────────────────────────────────────────────
-function PageTop({ crumb, eyebrow, title, lede, dark = false, action }) {
+function PageTop({ crumb, eyebrow, title, lede, dark = false, action, bgImage }) {
+  const hero = !!bgImage;
+  const cls = hero ? 'page-top page-top--hero' : 'page-top ' + (dark ? 'page-top--dark' : 'page-top--cream');
   return (
-    <section className={'page-top ' + (dark ? 'page-top--dark' : 'page-top--cream')}>
+    <section className={cls}>
+      {hero && <><img className="page-top__bg" src={bgImage} alt=""/><div className="page-top__shade"/></>}
       <div className="wrap page-top__inner">
         <div className="page-top__text">
           {crumb && <div className="crumb">{crumb}</div>}
-          <div className="eyebrow" style={{color: dark ? 'var(--mint)' : 'var(--terracotta)'}}>{eyebrow}</div>
+          <div className="eyebrow" style={{color: (dark||hero) ? 'var(--mint)' : 'var(--terracotta)'}}>{eyebrow}</div>
           <h1>{title}</h1>
           {lede && <p className="page-top__lede">{lede}</p>}
         </div>
@@ -110,9 +142,10 @@ function PageTop({ crumb, eyebrow, title, lede, dark = false, action }) {
 }
 
 // ─── Property image gallery lightbox ────────────────────────────────────────
-function PropGallery({ p, onClose }) {
+function PropGallery({ p, start = 0, onClose }) {
   const imgs = [0,1,2,3,4].map(o => pick(p.id, o));
-  const [i, setI] = uS(0);
+  const [i, setI] = uS(typeof start === 'number' ? start : 0);
+  const touch = React.useRef(null);
   const prev = () => setI(v => (v - 1 + imgs.length) % imgs.length);
   const next = () => setI(v => (v + 1) % imgs.length);
   React.useEffect(() => {
@@ -121,14 +154,24 @@ function PropGallery({ p, onClose }) {
     window.addEventListener('keydown', onKey);
     return () => { document.body.classList.remove('no-scroll'); window.removeEventListener('keydown', onKey); };
   }, []);
+  const onTouchStart = (e) => { touch.current = e.touches[0].clientX; };
+  const onTouchEnd = (e) => {
+    if (touch.current == null) return;
+    const dx = e.changedTouches[0].clientX - touch.current;
+    if (dx > 50) prev(); else if (dx < -50) next();
+    touch.current = null;
+  };
   return (
     <div className="lightbox" onClick={onClose}>
       <button className="lightbox__close" onClick={onClose} aria-label="Close">✕</button>
-      <div className="lightbox__stage" onClick={e=>e.stopPropagation()}>
+      <div className="lightbox__stage" onClick={e=>e.stopPropagation()} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <button className="lightbox__nav lightbox__nav--prev" onClick={prev} aria-label="Previous">‹</button>
         <img src={imgs[i]} alt={p.name}/>
         <button className="lightbox__nav lightbox__nav--next" onClick={next} aria-label="Next">›</button>
         <div className="lightbox__cap">{p.name} · {i+1} / {imgs.length}</div>
+        <div className="lightbox__dots">
+          {imgs.map((_,d)=>(<button key={d} className={'lightbox__dot'+(d===i?' is-on':'')} onClick={()=>setI(d)} aria-label={`Image ${d+1}`}/>))}
+        </div>
       </div>
     </div>
   );
@@ -159,10 +202,10 @@ function PropertiesPageV3({ setPage, openProp }) {
 
   return (
     <div>
-      <PageTop crumb="Explore & Stay" eyebrow="All Properties · Filters"
+      <PageTop bgImage="assets/stays/p2.jpg" eyebrow="All Properties"
         title={<>Every <em className="di">Landmark</em>.</>}
-        lede="33 restored buildings across the island — filtered the way you travel."
-        action={<a className="btn btn--ghost btn--sm" onClick={()=>setShowMap(s=>!s)}>{showMap ? 'Hide map' : 'View on map'} <span className="arr">→</span></a>}/>
+        lede="33 restored buildings across the island."
+        action={<a className="btn btn--ghost-w btn--sm" onClick={()=>setShowMap(s=>!s)}>{showMap ? 'Hide map' : 'View on map'} <span className="arr">→</span></a>}/>
 
       {/* Map row (toggled by "View on map") */}
       {showMap && (
@@ -249,7 +292,7 @@ function PropertiesPageV3({ setPage, openProp }) {
                   <div className="prop__body">
                     <div className="prop__row"><h3 className="prop__name">{p.name}</h3></div>
                     <div className="prop__loc">{p.location}</div>
-                    <p style={{fontFamily:'TT Norms Pro', fontSize:14, lineHeight:1.6, color:'var(--ink-soft)', marginTop:14, maxWidth:560}}>{p.blurb || 'A unique heritage stay, restored and let self-catering by the Trust.'}</p>
+                    <p style={{fontFamily:'TT Norms Pro', fontSize:14, lineHeight:1.6, color:'var(--ink-soft)', marginTop:14, maxWidth:560}}>{p.blurb || 'A unique heritage stay, restored and let self-catering by the Irish Landmark Trust.'}</p>
                     <div className="prop__meta"><span>Sleeps {p.sleeps}</span><span>{p.bedrooms} beds</span>{p.dog && <span>Dog-friendly</span>}</div>
                   </div>
                   <div style={{padding:'28px 32px', textAlign:'right', display:'flex', flexDirection:'column', justifyContent:'space-between', alignItems:'flex-end'}}>
@@ -267,7 +310,7 @@ function PropertiesPageV3({ setPage, openProp }) {
         </div>
       </section>
 
-      {gallery && <PropGallery p={gallery} onClose={()=>setGallery(null)}/>}
+      {lightbox !== null && <PropGallery p={p} start={lightbox} onClose={()=>setLightbox(null)}/>}
     </div>
   );
 }
@@ -303,7 +346,7 @@ function CategoryPageV3({ categoryId='lighthouses', setPage, openProp }) {
                 Our {cat.name.toLowerCase()} collection brings together {list.length} properties that share a particular character.
               </p>
               <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:0}}>
-                Curated by our Bookings Office and House Managers. Each building has been fully restored and is let self-catering, with revenue feeding directly into the next rescue.
+                Curated by our Bookings Office and House Managers. Each building has been fully restored and is let self-catering, with revenue feeding directly into the next building we save.
               </p>
             </div>
           </div>
@@ -382,31 +425,42 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
   const D = window.ILT_DATA;
   const p = D.props.find(x=>x.id===id) || D.props[0];
   const [tab, setTab] = uS('about');
+  const [lightbox, setLightbox] = uS(null);   // image index, or null
   const primaryCat = D.categories.find(c=>c.id===p.categories[0]) || D.categories[0];
   const similar = D.props.filter(x => x.id!==p.id && x.categories.some(c=>p.categories.includes(c))).slice(0,3);
 
   return (
     <div>
-      {/* Crumb */}
-      <div style={{padding:'100px 0 18px', background:'var(--cream)'}}>
-        <div className="wrap">
-          <div className="crumb">
-            <a onClick={()=>setPage('properties')}>← All properties</a>
+      {/* Fullscreen hero with title + badges */}
+      <section className="prop-hero">
+        <img className="prop-hero__img" src={pick(p.id, 0)} alt={p.name}/>
+        <div className="prop-hero__shade"/>
+        <div className="wrap prop-hero__inner">
+          <div className="crumb prop-hero__crumb">
+            <a onClick={()=>setPage('properties')}>All properties</a>
             {p.parent && <> / <a onClick={()=>setPage('multi',{parentId:p.parent})}>{p.parentName}</a></>}
-            {' / '}<span style={{color:'var(--green-deep)'}}>{p.name}</span>
+            {' / '}{p.name}
+          </div>
+          <h1 className="prop-hero__title">{p.name}</h1>
+          <div className="prop-hero__badges">
+            <span>{p.tag}</span>
+            <span>{p.location}</span>
+            <span>Sleeps {p.sleeps}</span>
+            <span>{p.bedrooms} bedroom{p.bedrooms>1?'s':''}</span>
+            <span>from {window.ILT_CUR(p)}{p.from}</span>
+            {p.dog && <span className="is-dog">Dog friendly</span>}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Gallery */}
-      <section style={{padding:'8px 0 40px', background:'var(--cream)'}}>
+      {/* Gallery strip */}
+      <section style={{padding:'40px 0 0', background:'var(--cream)'}}>
         <div className="wrap">
           <div className="pd-gallery">
-            <img src={pick(p.id, 0)} alt={p.name}/>
-            <img src={pick(p.id, 1)} alt=""/>
-            <img src={pick(p.id, 2)} alt=""/>
-            <img src={pick(p.id, 3)} alt=""/>
-            <img src={pick(p.id, 4)} alt=""/>
+            {[0,1,2,3,4].map(n => (
+              <img key={n} src={pick(p.id, n)} alt={n===0?p.name:''} onClick={()=>setLightbox(n)}/>
+            ))}
+            <button className="pd-gallery__all" onClick={()=>setLightbox(0)}>⊕ View gallery</button>
           </div>
         </div>
       </section>
@@ -414,18 +468,21 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
       <section style={{padding:'40px 0 120px', background:'var(--cream)'}}>
         <div className="wrap pd-main">
           <div>
-            <div className="eyebrow" style={{color:'var(--terracotta)'}}>{p.tag} · {p.location}</div>
-            <h1 className="display" style={{fontSize:64, fontWeight:400, margin:'14px 0 16px', letterSpacing:'-.015em'}}>{p.name}</h1>
-            <p style={{fontFamily:'meno-banner', fontWeight: 400, fontSize:22, lineHeight:1.55, color:'var(--ink-soft)', margin:'0 0 12px', maxWidth:680}}>{p.blurb || `A ${p.tag.toLowerCase()} restored and let by the Irish Landmark Trust, sleeping ${p.sleeps} in ${p.bedrooms} bedrooms.`}</p>
+            <p style={{fontFamily:'meno-banner', fontWeight: 400, fontSize:22, lineHeight:1.55, color:'var(--ink-soft)', margin:'0 0 28px', maxWidth:680}}>{p.blurb || `A ${p.tag.toLowerCase()} restored and let by the Irish Landmark Trust, sleeping ${p.sleeps} in ${p.bedrooms} bedrooms.`}</p>
 
-            <div className="pd-quick">
-              {[['Sleeps',p.sleeps],['Bedrooms',p.bedrooms],['Min stay','2 nights'],['Dogs',p.dog?'Yes — 1 only':'No']].map(([l,v])=>(
-                <div key={l}><div className="l">{l}</div><div className="v">{v}</div></div>
-              ))}
+            {/* Things you should know */}
+            <div className="pd-tysk">
+              <h3>Things you should know</h3>
+              <ul>
+                <li>Minimum stay: 2 nights (longer over peak dates)</li>
+                <li>Self-catering — linen, towels and a welcome basket provided</li>
+                {p.dog && <li><strong>Dog-friendly</strong> — one well-behaved dog welcome</li>}
+                <li>Met on arrival by your local House Manager</li>
+              </ul>
             </div>
 
             <div className="tabs">
-              {[['about','About'],['amenities','Amenities'],['itinerary','Itinerary'],['reviews','Reviews'],['history','House History'],['faqs','Property FAQs']].map(([k,l])=>(
+              {[['about','About'],['amenities','Amenities'],['itinerary','Itinerary'],['reviews','Reviews'],['history','History'],['faqs','Property FAQs']].map(([k,l])=>(
                 <button key={k} className={'tab '+(tab===k?'is-active':'')} onClick={()=>setTab(k)}>{l}</button>
               ))}
             </div>
@@ -502,9 +559,9 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
               <div>
                 <div className="eyebrow" style={{color:'var(--sage)'}}>Your House Manager</div>
                 <div style={{fontFamily:'Joane Stencil', fontSize:22, fontWeight:500, marginTop:4}}>Siobhán Murphy</div>
-                <div style={{fontFamily:'TT Norms Pro', fontSize:13, color:'var(--ink-soft)', marginTop:2}}>Lives 6km away · meets guests on arrival · cares for this building.</div>
+                <div style={{fontFamily:'TT Norms Pro', fontSize:14, lineHeight:1.6, color:'var(--ink-soft)', marginTop:6, maxWidth:560}}>Siobhán has looked after this building for nine years. She lives nearby, meets every guest on arrival, and knows the headland better than anyone — ask her where to find the best swim.</div>
               </div>
-              <a className="btn btn--ghost btn--sm">Contact</a>
+              <a className="btn btn--ghost btn--sm" onClick={()=>setPage('team')}>Meet the team →</a>
             </div>
           </div>
 
@@ -521,6 +578,7 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
               <a onClick={()=>setPage('stay')} style={{textDecoration:'underline'}}>How to book</a> · <a onClick={()=>setPage('faqs')} style={{textDecoration:'underline'}}>FAQs</a><br/>
               <a onClick={()=>setPage('stay')} style={{textDecoration:'underline'}}>Booking conditions</a> · <a onClick={()=>setPage('gift')} style={{textDecoration:'underline'}}>Use a gift voucher</a>
             </div>
+            <PropMap p={p}/>
           </aside>
         </div>
       </section>

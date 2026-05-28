@@ -5,6 +5,8 @@
 <title>Irish Landmark Trust — v3 Full Site</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" href="https://use.typekit.net/vje6fkm.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* Irish Landmark Trust — v3 design system
    Brand: PANTONE 357 deep green + PANTONE 486 terracotta + sage / mint / cream
@@ -91,7 +93,18 @@ input, textarea, select { font-family:inherit; }
 
 /* Typography utilities */
 .display { font-family:"Joane Stencil", "Joane Stencil", serif; font-weight:400; letter-spacing:-0.02em; line-height:0.98; }
-.display em, .di { font-family:"Joane Stencil", "Joane Stencil", serif; font-weight:300; font-weight:300; letter-spacing:-0.025em; }
+/* Milestone 2: single-tone headings (drop the light two-tone "italic" accent on big display type) */
+.display em, .di { font-family:"Joane Stencil", "Joane Stencil", serif; font-weight:400; letter-spacing:-0.02em; font-style:normal; }
+
+/* Milestone 2: remove superfluous micro-headings above main headings */
+.page-top .eyebrow,
+.intro .eyebrow,
+.labour__copy .eyebrow,
+.mission .eyebrow,
+.stories .eyebrow,
+.gift .eyebrow,
+.donateband .eyebrow,
+.newsband .eyebrow { display:none; }
 .eyebrow { font-family:"TT Norms Pro", sans-serif; font-size:12px; letter-spacing:.28em; text-transform:uppercase; font-weight:500; }
 .mono { font-family:"TT Norms Pro", sans-serif; }
 
@@ -357,14 +370,14 @@ input, textarea, select { font-family:inherit; }
 }
 
 /* Trust strip — scrolling marquee in Joane */
-.trust { background: var(--mint); color: var(--green-deep); padding: 26px 0; overflow: hidden; }
+.trust { background: var(--mint); color: var(--green-deep); padding: 16px 0; overflow: hidden; }
 .trust__track { display: flex; width: max-content; animation: trust-scroll 45s linear infinite; }
 .trust__group { display: flex; align-items: center; flex-shrink: 0; }
 .trust__item {
-  display: inline-flex; align-items: center; padding-right: 72px;
+  display: inline-flex; align-items: center; padding-right: 56px;
   font-family: "Joane Stencil"; font-weight: 400;
-  font-size: clamp(1.5rem, 1rem + 1.8vw, 2.375rem); /* ~24 → 38px */
-  letter-spacing: -.01em; line-height: 1; white-space: nowrap;
+  font-size: clamp(1rem, .85rem + .5vw, 1.375rem); /* ~16 → 22px — smaller, calmer */
+  letter-spacing: -.005em; line-height: 1; white-space: nowrap;
 }
 @keyframes trust-scroll {
   from { transform: translateX(0); }
@@ -385,8 +398,8 @@ input, textarea, select { font-family:inherit; }
 .pillars { display:flex; gap:24px; align-items:stretch; }
 .pillar {
   flex: 1 1 0; min-width: 0;
-  background:var(--cream-warm);
-  padding:48px 44px 44px; min-height:440px;
+  background:var(--green-deep);
+  padding:48px 44px 44px; min-height:520px;
   display:flex; flex-direction:column;
   position:relative; overflow:hidden;
   transition: flex-grow .55s var(--ease-out);
@@ -394,48 +407,33 @@ input, textarea, select { font-family:inherit; }
 }
 .pillar:hover { flex-grow: 2.4; }
 
-/* Video background — hidden by default, fades + Ken-Burns drift on hover */
+/* Image/video background — always visible; Ken-Burns drift on hover */
 .pillar__video {
   position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-  opacity:0; transform: scale(1.06); z-index:0;
-  transition: opacity .6s ease, transform 7s ease;
+  opacity:1; transform: scale(1.04); z-index:0;
+  transition: transform 7s ease;
 }
-.pillar:hover .pillar__video { opacity:1; transform: scale(1.14); }
+.pillar:hover .pillar__video { transform: scale(1.12); }
 
-/* Dark-green overlay so text stays legible over video */
+/* Dark-green overlay so the title stays legible over the image */
 .pillar__overlay {
   position:absolute; inset:0; z-index:1; pointer-events:none;
-  background: linear-gradient(180deg, rgba(26,60,52,.62) 0%, rgba(26,60,52,.84) 100%);
-  opacity:0; transition: opacity .6s ease;
+  background: linear-gradient(180deg, rgba(26,60,52,.15) 0%, rgba(26,60,52,.45) 55%, rgba(26,60,52,.85) 100%);
+  transition: background .5s ease;
 }
-.pillar:hover .pillar__overlay { opacity:1; }
+.pillar:hover .pillar__overlay { background: linear-gradient(180deg, rgba(26,60,52,.3) 0%, rgba(26,60,52,.6) 55%, rgba(26,60,52,.9) 100%); }
 
-.pillar__content { position:relative; z-index:2; display:flex; flex-direction:column; flex:1; }
-.pillar__num {
-  font-family:"Joane Stencil"; font-weight:300; font-size:80px; color:var(--sage);
-  line-height:.9; position:absolute; right:36px; top:32px; opacity:.4; z-index:2;
-  transition: color .45s ease, opacity .45s ease;
-}
-.pillar__eyebrow { color: var(--terracotta); transition: color .4s ease; }
-.pillar h3 { font-family:"Joane Stencil"; font-size: var(--fs-h3); line-height:1.05; font-weight:400; margin:16px 0 14px; letter-spacing:-.01em; transition: color .4s ease; }
-.pillar h3 em { font-weight:300; color:var(--green); transition: color .4s ease; }
-.pillar p { font-family:"TT Norms Pro"; font-size: var(--fs-body); line-height:1.65; color:var(--ink-soft); margin:0 0 28px; flex:1; transition: color .4s ease; }
-.pillar__link { font-family:"TT Norms Pro"; font-size:14px; font-weight:600; color:var(--green-deep); border-bottom:1px solid var(--green-deep); padding-bottom:3px; align-self:flex-start; letter-spacing:.02em; transition: color .3s ease, border-color .3s ease, padding-left .25s var(--ease-out); }
-
-/* Hover — switch text to light over the dark-green video overlay */
-.pillar:hover .pillar__num { color: rgba(251,248,246,.3); opacity:1; }
-.pillar:hover .pillar__eyebrow { color: var(--mint); }
-.pillar:hover h3 { color: var(--cream); }
-.pillar:hover h3 em { color: var(--mint); }
-.pillar:hover p { color: rgba(251,248,246,.92); }
-.pillar:hover .pillar__link { color: var(--cream); border-color: var(--cream); padding-left: 6px; }
+.pillar__content { position:relative; z-index:2; display:flex; flex-direction:column; justify-content:flex-end; flex:1; }
+.pillar h3 { font-family:"Joane Stencil"; font-size:38px; line-height:1.02; font-weight:400; margin:0 0 14px; letter-spacing:-.01em; color:var(--cream); }
+.pillar__link { font-family:"TT Norms Pro"; font-size:14px; font-weight:600; color:var(--cream); border-bottom:1px solid var(--cream); padding-bottom:3px; align-self:flex-start; letter-spacing:.02em; transition: padding-left .25s var(--ease-out); }
+.pillar:hover .pillar__link { padding-left: 6px; }
 
 /* Labour / mission teaser */
 .labour { background: var(--mint-soft); padding: 160px 0; position:relative; overflow:hidden; }
 .labour::before { content:''; position:absolute; left:-200px; top:-200px; width:560px; height:560px; border-radius:50%; background: radial-gradient(circle at 50% 50%, var(--mint) 0%, transparent 65%); opacity:.7; }
 .labour .wrap { display:grid; grid-template-columns: 1fr 1fr; gap:100px; align-items:center; position:relative; z-index:1; }
 .labour h2 { font-size: var(--fs-display-lg); line-height:.95; margin:18px 0 28px; }
-.labour h2 em { font-weight:300; color:var(--green); font-weight:300; }
+.labour h2 em { font-weight:400; color:var(--green); }
 .labour__copy p { font-family:"TT Norms Pro"; font-size: var(--fs-body); line-height:1.75; color:var(--ink-soft); margin:0 0 18px; }
 .labour__copy p.lead { font-family: var(--font-serif); font-weight:400; font-style:normal; font-size: var(--fs-lede-sm); line-height:1.5; color:var(--green-deep); }
 
@@ -522,7 +520,7 @@ input, textarea, select { font-family:inherit; }
   .topo use { opacity: .18; transition: none; }
 }
 .mission h2 { font-size: var(--fs-display-xl); line-height:.95; margin:18px 0 28px; }
-.mission h2 em { font-weight:300; color:var(--mint); font-weight:300; }
+.mission h2 em { font-weight:400; color:var(--mint); }
 .mission__lede { font-family: var(--font-serif); font-weight:400; font-style:normal; font-size: var(--fs-lede-sm); line-height:1.55; opacity:.85; max-width:540px; margin:0 0 48px; }
 .mission__stats { display:grid; grid-template-columns: repeat(3, 1fr); gap:32px; margin:0 0 48px; }
 .stat__n { font-family:"Joane Stencil"; font-weight:300; font-weight:300; font-size: var(--fs-stat); line-height:1; color:var(--terracotta); letter-spacing:-.02em; }
@@ -560,7 +558,7 @@ input, textarea, select { font-family:inherit; }
 .gift__voucher__amt { font-family:"Joane Stencil"; font-weight:400; font-size:56px; line-height:1; color:var(--green-deep); margin:6px 0 10px; }
 .gift__voucher__foot { font-family:"TT Norms Pro"; font-size:12px; line-height:1.5; color:var(--ink-soft); border-top:1px dashed var(--line); padding-top:12px; }
 .gift__body h2 { font-family:"Joane Stencil"; font-size: var(--fs-display-md); line-height:1; margin:12px 0 16px; font-weight:400; letter-spacing:-.01em; }
-.gift__body h2 em { font-weight:300; }
+.gift__body h2 em { font-weight:400; }
 .gift__body p { font-family:"TT Norms Pro"; font-size:16px; line-height:1.65; color:var(--ink-soft); max-width:480px; margin:0; }
 .gift__amounts { display:flex; gap:10px; flex-wrap:wrap; margin:26px 0 30px; }
 .gift__chip {
@@ -573,14 +571,14 @@ input, textarea, select { font-family:inherit; }
 /* Donate banner */
 .donateband { background: var(--green-deep); color: var(--cream); padding: 110px 0; text-align:center; }
 .donateband h2 { font-family:"Joane Stencil"; font-size: var(--fs-display-md); font-weight:400; line-height:1.02; margin:14px auto 18px; max-width:900px; }
-.donateband h2 em { color: var(--mint); font-weight:300; }
+.donateband h2 em { color: var(--mint); font-weight:400; }
 .donateband p { font-family:"TT Norms Pro"; font-size:17px; line-height:1.6; max-width:600px; margin:0 auto 28px; opacity:.85; }
 
 /* Newsletter band */
 .newsband { background: var(--cream-warm); padding: 80px 0; }
 .newsband__inner { display:grid; grid-template-columns: 1fr 1fr; gap:48px; align-items:center; }
 .newsband h2 { font-family:"Joane Stencil"; font-size: var(--fs-display-sm); line-height:1.02; margin:10px 0 14px; font-weight:400; letter-spacing:-.01em; }
-.newsband h2 em { font-weight:300; }
+.newsband h2 em { font-weight:400; }
 .newsband p { font-family:"TT Norms Pro"; font-size:16px; line-height:1.6; color:var(--ink-soft); max-width:480px; margin:0; }
 .duo__consent { font-family:"TT Norms Pro"; font-size:12px; color:var(--ink-soft); margin-top:16px; }
 .newsletter { display:flex; background:var(--cream); border-radius:0; padding:4px; border:1px solid var(--line); max-width:440px; }
@@ -600,6 +598,27 @@ footer.f { background: var(--green-deep); color: var(--cream); padding: 90px 0 1
 .f__support { background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); padding:26px 28px; align-self:start; }
 .f__support h5 { font-family:"Joane Stencil"; font-weight:400; font-size:24px; margin:0 0 10px; color:var(--cream); }
 .f__support p { font-family:"TT Norms Pro"; font-size:14px; line-height:1.6; opacity:.8; margin:0 0 18px; }
+/* Donor recognition — three font-size tiers, no amounts/categories */
+.donor-tiers { display:grid; gap:18px; }
+.donor-tier { font-family:"Joane Stencil"; font-weight:400; color:var(--green-deep); line-height:1.3; margin:0; }
+.donor-tier--1 { font-size:26px; }
+.donor-tier--2 { font-size:19px; color:var(--ink-soft); }
+.donor-tier--3 { font-family:"TT Norms Pro"; font-size:14px; line-height:1.6; color:var(--sage); }
+
+/* Donate page — current-project callout card */
+.donate-project { display:grid; grid-template-columns:120px 1fr; gap:20px; align-items:center; margin-top:32px; max-width:520px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); padding:16px; cursor:pointer; transition:background .2s ease; }
+.donate-project:hover { background:rgba(255,255,255,.1); }
+.donate-project__img { aspect-ratio:1/1; overflow:hidden; }
+.donate-project__img img { width:100%; height:100%; object-fit:cover; }
+.donate-project__body h3 { font-family:"Joane Stencil"; font-weight:400; font-size:22px; margin:6px 0 10px; color:var(--cream); }
+.donate-project__bar { height:5px; background:rgba(255,255,255,.15); overflow:hidden; margin-bottom:12px; }
+.donate-project__bar span { display:block; height:100%; background:var(--terracotta); }
+.donate-project__link { font-family:"TT Norms Pro"; font-size:13px; font-weight:600; color:var(--cream); border-bottom:1px solid var(--cream); padding-bottom:2px; }
+
+/* Heritage Council funder slot (replace text with their logo asset) */
+.f__funder { display:flex; align-items:center; gap:18px; padding:24px 0 0; }
+.f__funder-label { font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.18em; text-transform:uppercase; opacity:.55; }
+.f__funder-logo { font-family:"TT Norms Pro"; font-size:13px; font-weight:500; color:var(--cream); border:1px solid rgba(255,255,255,.25); padding:10px 16px; }
 .f__bottom { display:flex; justify-content:space-between; align-items:center; padding:24px 0 36px; font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.14em; text-transform:uppercase; opacity:.6; }
 .f__bottom a { cursor:pointer; }
 .socials { display:flex; gap:18px; }
@@ -630,6 +649,14 @@ footer.f { background: var(--green-deep); color: var(--cream); padding: 90px 0 1
 .lightbox__nav:hover { background:rgba(251,248,246,.28); }
 .lightbox__nav--prev { left:-70px; } .lightbox__nav--next { right:-70px; }
 .lightbox__cap { color:var(--cream); font-family:"TT Norms Pro"; font-size:13px; letter-spacing:.16em; text-transform:uppercase; margin-top:18px; text-align:center; opacity:.85; }
+.lightbox__dots { display:flex; gap:8px; justify-content:center; margin-top:14px; }
+.lightbox__dot { width:8px; height:8px; border-radius:50%; border:none; background:rgba(251,248,246,.35); cursor:pointer; padding:0; transition:background .15s ease, transform .15s ease; }
+.lightbox__dot.is-on { background:var(--cream); transform:scale(1.25); }
+/* pd-gallery: clickable images + view-all button */
+.pd-gallery { position:relative; }
+.pd-gallery img { cursor:zoom-in; }
+.pd-gallery__all { position:absolute; right:14px; bottom:14px; z-index:2; background:rgba(26,60,52,.85); color:var(--cream); border:none; backdrop-filter:blur(4px); font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.1em; text-transform:uppercase; padding:9px 14px; cursor:pointer; }
+.pd-gallery__all:hover { background:var(--green-deep); }
 @media (max-width: 1140px) { .lightbox__nav--prev { left:10px; } .lightbox__nav--next { right:10px; } }
 
 /* ─── Inner pages: top hero pattern ─── */
@@ -641,8 +668,15 @@ footer.f { background: var(--green-deep); color: var(--cream); padding: 90px 0 1
 .page-top--dark { background: var(--green-deep); color:var(--cream); border-bottom:none; }
 .page-top--dark .crumb a { color:var(--mint); }
 .page-top--cream { background: var(--cream); }
+/* Hero page-top with full-bleed background image */
+.page-top--hero { position:relative; overflow:hidden; border-bottom:none; color:var(--cream); min-height: clamp(420px, 52vh, 560px); display:flex; align-items:flex-end; padding: 150px 0 56px; }
+.page-top--hero .page-top__bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
+.page-top--hero .page-top__shade { position:absolute; inset:0; z-index:1; background:linear-gradient(180deg, rgba(26,60,52,.3) 0%, rgba(26,60,52,.25) 45%, rgba(26,60,52,.8) 100%); }
+.page-top--hero .page-top__inner { position:relative; z-index:2; }
+.page-top--hero h1 { color:var(--cream); }
+.page-top--hero .page-top__lede { color:rgba(251,248,246,.92); }
 .page-top h1 { font-family:"Joane Stencil"; font-size: var(--fs-display-xl); line-height:.98; font-weight:400; margin:14px 0 18px; letter-spacing:-.02em; }
-.page-top h1 em { font-weight:300; font-weight:300; }
+.page-top h1 em { font-weight:400; }
 .page-top__lede { font-family: var(--font-serif); font-weight:400; font-style:normal; font-size: var(--fs-lede); line-height:1.45; max-width:720px; margin:0; opacity:.88; }
 .crumb { font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--sage); margin-bottom:18px; }
 .crumb a:hover { color:var(--terracotta); }
@@ -701,6 +735,38 @@ footer.f { background: var(--green-deep); color: var(--cream); padding: 90px 0 1
 .pd-gallery { display:grid; grid-template-columns:2fr 1fr 1fr; grid-template-rows: 240px 240px; gap:8px; }
 .pd-gallery > *:first-child { grid-row: 1 / 3; }
 .pd-gallery img { width:100%; height:100%; object-fit:cover; border-radius:6px; }
+/* Property location map (booking rail) */
+.prop-map { margin-top:20px; padding-top:20px; border-top:1px solid var(--line-warm); }
+.prop-map__head { font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage); margin-bottom:12px; display:flex; justify-content:space-between; gap:10px; }
+.prop-map__head span { letter-spacing:.02em; text-transform:none; color:var(--ink-soft); }
+.prop-map__frame { aspect-ratio:4/3; overflow:hidden; border:1px solid var(--line-warm); background:#eef0ea; }
+.prop-map__frame iframe { width:100%; height:100%; display:block; }
+.prop-map .leaflet-container { width:100%; height:100%; background:#eef0ea; font-family:"TT Norms Pro"; }
+/* Clean 2-colour: mute the tile palette slightly toward the brand neutral */
+.prop-map .leaflet-tile-pane { filter: grayscale(.4) brightness(1.02); }
+.prop-pin span { display:block; width:18px; height:18px; border-radius:50%; background:var(--terracotta); border:3px solid var(--cream); box-shadow:0 2px 6px rgba(26,60,52,.4); }
+.prop-map__link { display:inline-block; margin-top:10px; font-family:"TT Norms Pro"; font-size:13px; font-weight:600; color:var(--green-deep); border-bottom:1px solid var(--green-deep); padding-bottom:2px; }
+
+/* Property fullscreen hero */
+.prop-hero { position:relative; min-height: clamp(440px, 56vh, 620px); overflow:hidden; display:flex; align-items:flex-end; background:var(--green-deep); }
+.prop-hero__img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.prop-hero__shade { position:absolute; inset:0; background:linear-gradient(180deg, rgba(26,60,52,.25) 0%, rgba(26,60,52,.2) 40%, rgba(26,60,52,.85) 100%); }
+.prop-hero__inner { position:relative; z-index:2; color:var(--cream); padding:0 0 48px; }
+.prop-hero__crumb { color:rgba(251,248,246,.8); margin-bottom:16px; }
+.prop-hero__crumb a { cursor:pointer; } .prop-hero__crumb a:hover { color:var(--cream); }
+.prop-hero__title { font-family:"Joane Stencil"; font-weight:400; font-size: clamp(2.5rem, 1.6rem + 4vw, 5rem); line-height:1; letter-spacing:-.02em; margin:0 0 20px; }
+.prop-hero__badges { display:flex; flex-wrap:wrap; gap:10px; }
+.prop-hero__badges span { font-family:"TT Norms Pro"; font-size:13px; letter-spacing:.04em; padding:8px 14px; border:1px solid rgba(251,248,246,.4); }
+.prop-hero__badges .is-dog { background:var(--terracotta); border-color:var(--terracotta); }
+
+/* Things you should know */
+.pd-tysk { margin:0 0 36px; padding:24px 0 28px; border-top:1px solid var(--line-warm); border-bottom:1px solid var(--line-warm); }
+.pd-tysk h3 { font-family:"Joane Stencil"; font-size:24px; font-weight:400; margin:0 0 14px; }
+.pd-tysk ul { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+.pd-tysk li { font-family:"TT Norms Pro"; font-size:15px; line-height:1.5; color:var(--ink-soft); padding-left:20px; position:relative; }
+.pd-tysk li::before { content:''; position:absolute; left:4px; top:.6em; width:6px; height:6px; background:var(--terracotta); }
+.pd-tysk li strong { color:var(--green-deep); }
+
 .pd-main { display:grid; grid-template-columns: 1fr 380px; gap:72px; }
 .pd-quick { display:flex; gap:32px; padding:24px 0; border-bottom:1px solid var(--line-warm); margin:32px 0; }
 .pd-quick > div .l { font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage); }
@@ -1566,7 +1632,7 @@ const NAV = [
     feature: {
       img: 'assets/img-5.jpg', tag: 'About us', eyebrow: 'Charity Reg. 20028909 (ROI) · NIC101205 (NI)',
       title: "An all-island charity since 1992",
-      copy: "We restore buildings too small for the state and too specific for the market — and let them as holidays to fund the next rescue.",
+      copy: "We restore buildings too small for the state and too specific for the market — and let them as holidays to fund the next building we save.",
       cta: 'Our story', page: 'about'
     }
   },
@@ -1778,6 +1844,10 @@ function FooterV3({ setPage }) {
             <a className="btn btn--accent btn--sm" onClick={()=>setPage('donate')}>Donate Now <span className="arr">→</span></a>
           </div>
         </div>
+        <div className="f__funder">
+          <span className="f__funder-label">Supported by</span>
+          <span className="f__funder-logo">An&nbsp;Chomhairle&nbsp;Oidhreachta · The&nbsp;Heritage&nbsp;Council</span>
+        </div>
         <div className="f__bottom">
           <div>Privacy &nbsp;|&nbsp; Terms &nbsp;|&nbsp; Cookies &nbsp;|&nbsp; Accessibility &nbsp;|&nbsp; <a onClick={()=>setPage('contact')}>Contact Us</a></div>
           <div className="socials">
@@ -1809,9 +1879,9 @@ function Prop({ p, onClick, onImageClick }) {
         </div>
         <div className="prop__loc">{p.location}</div>
         <div className="prop__meta">
+          <span>{p.tag}</span>
           <span>Sleeps {p.sleeps}</span>
           <span>{p.bedrooms} bed{p.bedrooms>1?'s':''}</span>
-          <span>2-night min</span>
         </div>
       </div>
     </a>
@@ -1892,7 +1962,7 @@ function HomeV3({ setPage, openProp }) {
               <span className="hero__line"><span>Educating <em className="di">and Inspiring</em></span></span>
               <span className="hero__line"><span>one guest at a time.</span></span>
             </h1>
-            <p className="hero__lede">Lighthouses, gate lodges, schoolhouses and keepers' cottages — restored, self-catering, and let as holidays to fund the next rescue.</p>
+            <p className="hero__lede">Lighthouses, gate lodges, schoolhouses and keepers' cottages — restored, self-catering, and let as holidays to fund the next building we save.</p>
 
             <div className="search">
               <div className="search__cell"><div className="l">Dates</div><div className="v">Check in → Check out</div></div>
@@ -1926,7 +1996,7 @@ function HomeV3({ setPage, openProp }) {
         <div className="trust__track">
           {[0,1].map(dup => (
             <div className="trust__group" key={dup} aria-hidden={dup===1}>
-              {['33 unique properties','34 years of restoration','All-island charity (ROI & NI)','Traditional crafts, local makers','Every stay funds the next rescue'].map((t,i)=>(
+              {['33 unique properties','34 years of restoration','All-island charity (ROI & NI)','Traditional crafts, local makers','Every stay funds the next building we save'].map((t,i)=>(
                 <span className="trust__item" key={i}>{t}</span>
               ))}
             </div>
@@ -1934,34 +2004,24 @@ function HomeV3({ setPage, openProp }) {
         </div>
       </section>
 
-      {/* PILLARS */}
-      <section className="section">
+      {/* PILLARS — expanding image panels, minimal text */}
+      <section className="section section--pillars">
         <div className="wrap">
-          <div className="intro">
-            <div></div>
-            <div>
-              <h2 className="display">Browse, support, or simply <em className="di">get to know us</em>.</h2>
-              <p className="intro__sub">We're a charity that runs as a holiday-let business — so the website does both jobs. Find the way in that fits why you're here.</p>
-            </div>
-          </div>
           <div className="pillars">
             {[
-              ['01','Pillar one','Explore','& Stay','33 properties across the island. Browse by map, by category, or jump straight to availability. Every booking funds restoration.','See all properties →','properties','assets/hero-lighthouse.jpg','assets/video/explore.mp4'],
-              ['02','Pillar two','Support','& Learn','Follow Saunderscourt, our flagship current project. Donate, volunteer, or sign up for our heritage skills programme.','See current projects →','projects','assets/img-6.jpg','assets/video/support.mp4'],
-              ['03','Pillar three','About','us','Thirty-four years of saving what was nearly lost. Meet the team, read our governance, and see where the money goes.','Our story →','about','assets/img-5.jpg','assets/video/about.mp4'],
-            ].map(([n,e,t,et,c,l,page,poster,video])=>(
-              <a key={n} className="pillar" onClick={()=>setPage(page)}
+              ['Our Properties','See all properties →','properties','assets/hero-lighthouse.jpg','assets/video/explore.mp4'],
+              ['Our Projects','See current projects →','projects','assets/img-6.jpg','assets/video/support.mp4'],
+              ['Our Story','Read our story →','about','assets/img-5.jpg','assets/video/about.mp4'],
+            ].map(([t,l,page,poster,video])=>(
+              <a key={t} className="pillar" onClick={()=>setPage(page)}
                 onMouseEnter={ev => { const v = ev.currentTarget.querySelector('video'); if (v) v.play().catch(()=>{}); }}
                 onMouseLeave={ev => { const v = ev.currentTarget.querySelector('video'); if (v) { v.pause(); } }}>
                 <video className="pillar__video" poster={poster} muted loop playsInline preload="none">
                   <source src={video} type="video/mp4"/>
                 </video>
                 <div className="pillar__overlay"/>
-                <div className="pillar__num">{n}</div>
                 <div className="pillar__content">
-                  <div className="eyebrow pillar__eyebrow">{e}</div>
-                  <h3>{t} <em className="di">{et}</em></h3>
-                  <p>{c}</p>
+                  <h3>{t}</h3>
                   <span className="pillar__link">{l}</span>
                 </div>
               </a>
@@ -1984,12 +2044,11 @@ function HomeV3({ setPage, openProp }) {
         </svg>
         <div className="wrap">
           <div className="labour__copy">
-            <div className="eyebrow" style={{color:'var(--green)'}}>A labour of love</div>
-            <h2 className="display">Behind every <em className="di">great building</em>, a great story.</h2>
-            <p className="lead">As an educational charity we are passionate about knowledge-sharing with our community of heritage enthusiasts and guests.</p>
-            <p>Our ability to restore heritage buildings depends on the survival of traditional craft skills and the people who carry them. Every stay you take helps keep both alive — and gives the next building a future.</p>
+            <h2 className="display">Learning is at the heart of what we do.</h2>
+            <p className="lead">As an educational charity we are passionate about sharing knowledge with our community of heritage enthusiasts and guests.</p>
+            <p>Restoring heritage buildings depends on the survival of traditional craft skills and the people who carry them. Our learning programme — apprenticeships, open days and seminars — helps keep those skills alive.</p>
             <div style={{display:'flex', gap:14, marginTop:36}}>
-              <a className="btn btn--dark" onClick={()=>setPage('about')}>Our history <span className="arr">→</span></a>
+              <a className="btn btn--dark" onClick={()=>setPage('learn')}>Our learning programme <span className="arr">→</span></a>
               <a className="btn btn--ghost" onClick={()=>setPage('about')}>How we work</a>
             </div>
           </div>
@@ -2133,7 +2192,7 @@ function HomeV3({ setPage, openProp }) {
           <div className="gift__body">
             <div className="eyebrow" style={{color:'var(--terracotta)'}}>Gift Vouchers</div>
             <h2 className="display">A stay, <em className="di">wrapped</em>.</h2>
-            <p>Give a night in a lighthouse, or a week in a gate lodge — a present that makes memories and funds the next rescue. Choose an amount, or let them pick the place.</p>
+            <p>Give a night in a lighthouse, or a week in a gate lodge — a present that makes memories and funds the next building we save. Choose an amount, or let them pick the place.</p>
             <div className="gift__amounts">
               {['€100','€250','€500','Any amount'].map((a,i)=>(
                 <button key={a} className={'gift__chip'+(i===1?' is-active':'')} onClick={()=>setPage('gift')}>{a}</button>
@@ -2259,6 +2318,35 @@ function BookingCalendar({ propId, name, onBook }) {
   );
 }
 
+// ─── Interactive location map — Leaflet + clean 2-colour CARTO tiles ────────
+function PropMap({ p }) {
+  const ref = React.useRef(null);
+  const [lat, lng] = p.coords || [];
+  React.useEffect(() => {
+    if (!p.coords || !window.L || !ref.current) return;
+    const map = window.L.map(ref.current, { scrollWheelZoom:false, attributionControl:false }).setView([lat, lng], 11);
+    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19, subdomains: 'abcd',
+    }).addTo(map);
+    // Brand-green circular pin
+    window.L.marker([lat, lng], {
+      icon: window.L.divIcon({ className:'prop-pin', html:'<span></span>', iconSize:[18,18], iconAnchor:[9,9] })
+    }).addTo(map);
+    map.getContainer().addEventListener('click', () => map.scrollWheelZoom.enable());
+    return () => map.remove();
+  }, [p.id]);
+
+  if (!p.coords) return null;
+  const big = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=13/${lat}/${lng}`;
+  return (
+    <div className="prop-map">
+      <div className="prop-map__head">Location <span>{p.location}</span></div>
+      <div className="prop-map__frame" ref={ref}></div>
+      <a className="prop-map__link" href={big} target="_blank" rel="noopener">Open larger map →</a>
+    </div>
+  );
+}
+
 // ─── FAQ accordion item (smooth height animation, rule divider) ─────────────
 function FaqItem({ q, children }) {
   const [open, setOpen] = uS(false);
@@ -2273,13 +2361,16 @@ function FaqItem({ q, children }) {
 }
 
 // ─── Page top hero ──────────────────────────────────────────────────────────
-function PageTop({ crumb, eyebrow, title, lede, dark = false, action }) {
+function PageTop({ crumb, eyebrow, title, lede, dark = false, action, bgImage }) {
+  const hero = !!bgImage;
+  const cls = hero ? 'page-top page-top--hero' : 'page-top ' + (dark ? 'page-top--dark' : 'page-top--cream');
   return (
-    <section className={'page-top ' + (dark ? 'page-top--dark' : 'page-top--cream')}>
+    <section className={cls}>
+      {hero && <><img className="page-top__bg" src={bgImage} alt=""/><div className="page-top__shade"/></>}
       <div className="wrap page-top__inner">
         <div className="page-top__text">
           {crumb && <div className="crumb">{crumb}</div>}
-          <div className="eyebrow" style={{color: dark ? 'var(--mint)' : 'var(--terracotta)'}}>{eyebrow}</div>
+          <div className="eyebrow" style={{color: (dark||hero) ? 'var(--mint)' : 'var(--terracotta)'}}>{eyebrow}</div>
           <h1>{title}</h1>
           {lede && <p className="page-top__lede">{lede}</p>}
         </div>
@@ -2290,9 +2381,10 @@ function PageTop({ crumb, eyebrow, title, lede, dark = false, action }) {
 }
 
 // ─── Property image gallery lightbox ────────────────────────────────────────
-function PropGallery({ p, onClose }) {
+function PropGallery({ p, start = 0, onClose }) {
   const imgs = [0,1,2,3,4].map(o => pick(p.id, o));
-  const [i, setI] = uS(0);
+  const [i, setI] = uS(typeof start === 'number' ? start : 0);
+  const touch = React.useRef(null);
   const prev = () => setI(v => (v - 1 + imgs.length) % imgs.length);
   const next = () => setI(v => (v + 1) % imgs.length);
   React.useEffect(() => {
@@ -2301,14 +2393,24 @@ function PropGallery({ p, onClose }) {
     window.addEventListener('keydown', onKey);
     return () => { document.body.classList.remove('no-scroll'); window.removeEventListener('keydown', onKey); };
   }, []);
+  const onTouchStart = (e) => { touch.current = e.touches[0].clientX; };
+  const onTouchEnd = (e) => {
+    if (touch.current == null) return;
+    const dx = e.changedTouches[0].clientX - touch.current;
+    if (dx > 50) prev(); else if (dx < -50) next();
+    touch.current = null;
+  };
   return (
     <div className="lightbox" onClick={onClose}>
       <button className="lightbox__close" onClick={onClose} aria-label="Close">✕</button>
-      <div className="lightbox__stage" onClick={e=>e.stopPropagation()}>
+      <div className="lightbox__stage" onClick={e=>e.stopPropagation()} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <button className="lightbox__nav lightbox__nav--prev" onClick={prev} aria-label="Previous">‹</button>
         <img src={imgs[i]} alt={p.name}/>
         <button className="lightbox__nav lightbox__nav--next" onClick={next} aria-label="Next">›</button>
         <div className="lightbox__cap">{p.name} · {i+1} / {imgs.length}</div>
+        <div className="lightbox__dots">
+          {imgs.map((_,d)=>(<button key={d} className={'lightbox__dot'+(d===i?' is-on':'')} onClick={()=>setI(d)} aria-label={`Image ${d+1}`}/>))}
+        </div>
       </div>
     </div>
   );
@@ -2339,10 +2441,10 @@ function PropertiesPageV3({ setPage, openProp }) {
 
   return (
     <div>
-      <PageTop crumb="Explore & Stay" eyebrow="All Properties · Filters"
+      <PageTop bgImage="assets/stays/p2.jpg" eyebrow="All Properties"
         title={<>Every <em className="di">Landmark</em>.</>}
-        lede="33 restored buildings across the island — filtered the way you travel."
-        action={<a className="btn btn--ghost btn--sm" onClick={()=>setShowMap(s=>!s)}>{showMap ? 'Hide map' : 'View on map'} <span className="arr">→</span></a>}/>
+        lede="33 restored buildings across the island."
+        action={<a className="btn btn--ghost-w btn--sm" onClick={()=>setShowMap(s=>!s)}>{showMap ? 'Hide map' : 'View on map'} <span className="arr">→</span></a>}/>
 
       {/* Map row (toggled by "View on map") */}
       {showMap && (
@@ -2429,7 +2531,7 @@ function PropertiesPageV3({ setPage, openProp }) {
                   <div className="prop__body">
                     <div className="prop__row"><h3 className="prop__name">{p.name}</h3></div>
                     <div className="prop__loc">{p.location}</div>
-                    <p style={{fontFamily:'TT Norms Pro', fontSize:14, lineHeight:1.6, color:'var(--ink-soft)', marginTop:14, maxWidth:560}}>{p.blurb || 'A unique heritage stay, restored and let self-catering by the Trust.'}</p>
+                    <p style={{fontFamily:'TT Norms Pro', fontSize:14, lineHeight:1.6, color:'var(--ink-soft)', marginTop:14, maxWidth:560}}>{p.blurb || 'A unique heritage stay, restored and let self-catering by the Irish Landmark Trust.'}</p>
                     <div className="prop__meta"><span>Sleeps {p.sleeps}</span><span>{p.bedrooms} beds</span>{p.dog && <span>Dog-friendly</span>}</div>
                   </div>
                   <div style={{padding:'28px 32px', textAlign:'right', display:'flex', flexDirection:'column', justifyContent:'space-between', alignItems:'flex-end'}}>
@@ -2447,7 +2549,7 @@ function PropertiesPageV3({ setPage, openProp }) {
         </div>
       </section>
 
-      {gallery && <PropGallery p={gallery} onClose={()=>setGallery(null)}/>}
+      {lightbox !== null && <PropGallery p={p} start={lightbox} onClose={()=>setLightbox(null)}/>}
     </div>
   );
 }
@@ -2483,7 +2585,7 @@ function CategoryPageV3({ categoryId='lighthouses', setPage, openProp }) {
                 Our {cat.name.toLowerCase()} collection brings together {list.length} properties that share a particular character.
               </p>
               <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:0}}>
-                Curated by our Bookings Office and House Managers. Each building has been fully restored and is let self-catering, with revenue feeding directly into the next rescue.
+                Curated by our Bookings Office and House Managers. Each building has been fully restored and is let self-catering, with revenue feeding directly into the next building we save.
               </p>
             </div>
           </div>
@@ -2562,31 +2664,42 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
   const D = window.ILT_DATA;
   const p = D.props.find(x=>x.id===id) || D.props[0];
   const [tab, setTab] = uS('about');
+  const [lightbox, setLightbox] = uS(null);   // image index, or null
   const primaryCat = D.categories.find(c=>c.id===p.categories[0]) || D.categories[0];
   const similar = D.props.filter(x => x.id!==p.id && x.categories.some(c=>p.categories.includes(c))).slice(0,3);
 
   return (
     <div>
-      {/* Crumb */}
-      <div style={{padding:'100px 0 18px', background:'var(--cream)'}}>
-        <div className="wrap">
-          <div className="crumb">
-            <a onClick={()=>setPage('properties')}>← All properties</a>
+      {/* Fullscreen hero with title + badges */}
+      <section className="prop-hero">
+        <img className="prop-hero__img" src={pick(p.id, 0)} alt={p.name}/>
+        <div className="prop-hero__shade"/>
+        <div className="wrap prop-hero__inner">
+          <div className="crumb prop-hero__crumb">
+            <a onClick={()=>setPage('properties')}>All properties</a>
             {p.parent && <> / <a onClick={()=>setPage('multi',{parentId:p.parent})}>{p.parentName}</a></>}
-            {' / '}<span style={{color:'var(--green-deep)'}}>{p.name}</span>
+            {' / '}{p.name}
+          </div>
+          <h1 className="prop-hero__title">{p.name}</h1>
+          <div className="prop-hero__badges">
+            <span>{p.tag}</span>
+            <span>{p.location}</span>
+            <span>Sleeps {p.sleeps}</span>
+            <span>{p.bedrooms} bedroom{p.bedrooms>1?'s':''}</span>
+            <span>from {window.ILT_CUR(p)}{p.from}</span>
+            {p.dog && <span className="is-dog">Dog friendly</span>}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Gallery */}
-      <section style={{padding:'8px 0 40px', background:'var(--cream)'}}>
+      {/* Gallery strip */}
+      <section style={{padding:'40px 0 0', background:'var(--cream)'}}>
         <div className="wrap">
           <div className="pd-gallery">
-            <img src={pick(p.id, 0)} alt={p.name}/>
-            <img src={pick(p.id, 1)} alt=""/>
-            <img src={pick(p.id, 2)} alt=""/>
-            <img src={pick(p.id, 3)} alt=""/>
-            <img src={pick(p.id, 4)} alt=""/>
+            {[0,1,2,3,4].map(n => (
+              <img key={n} src={pick(p.id, n)} alt={n===0?p.name:''} onClick={()=>setLightbox(n)}/>
+            ))}
+            <button className="pd-gallery__all" onClick={()=>setLightbox(0)}>⊕ View gallery</button>
           </div>
         </div>
       </section>
@@ -2594,18 +2707,21 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
       <section style={{padding:'40px 0 120px', background:'var(--cream)'}}>
         <div className="wrap pd-main">
           <div>
-            <div className="eyebrow" style={{color:'var(--terracotta)'}}>{p.tag} · {p.location}</div>
-            <h1 className="display" style={{fontSize:64, fontWeight:400, margin:'14px 0 16px', letterSpacing:'-.015em'}}>{p.name}</h1>
-            <p style={{fontFamily:'meno-banner', fontWeight: 400, fontSize:22, lineHeight:1.55, color:'var(--ink-soft)', margin:'0 0 12px', maxWidth:680}}>{p.blurb || `A ${p.tag.toLowerCase()} restored and let by the Irish Landmark Trust, sleeping ${p.sleeps} in ${p.bedrooms} bedrooms.`}</p>
+            <p style={{fontFamily:'meno-banner', fontWeight: 400, fontSize:22, lineHeight:1.55, color:'var(--ink-soft)', margin:'0 0 28px', maxWidth:680}}>{p.blurb || `A ${p.tag.toLowerCase()} restored and let by the Irish Landmark Trust, sleeping ${p.sleeps} in ${p.bedrooms} bedrooms.`}</p>
 
-            <div className="pd-quick">
-              {[['Sleeps',p.sleeps],['Bedrooms',p.bedrooms],['Min stay','2 nights'],['Dogs',p.dog?'Yes — 1 only':'No']].map(([l,v])=>(
-                <div key={l}><div className="l">{l}</div><div className="v">{v}</div></div>
-              ))}
+            {/* Things you should know */}
+            <div className="pd-tysk">
+              <h3>Things you should know</h3>
+              <ul>
+                <li>Minimum stay: 2 nights (longer over peak dates)</li>
+                <li>Self-catering — linen, towels and a welcome basket provided</li>
+                {p.dog && <li><strong>Dog-friendly</strong> — one well-behaved dog welcome</li>}
+                <li>Met on arrival by your local House Manager</li>
+              </ul>
             </div>
 
             <div className="tabs">
-              {[['about','About'],['amenities','Amenities'],['itinerary','Itinerary'],['reviews','Reviews'],['history','House History'],['faqs','Property FAQs']].map(([k,l])=>(
+              {[['about','About'],['amenities','Amenities'],['itinerary','Itinerary'],['reviews','Reviews'],['history','History'],['faqs','Property FAQs']].map(([k,l])=>(
                 <button key={k} className={'tab '+(tab===k?'is-active':'')} onClick={()=>setTab(k)}>{l}</button>
               ))}
             </div>
@@ -2682,9 +2798,9 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
               <div>
                 <div className="eyebrow" style={{color:'var(--sage)'}}>Your House Manager</div>
                 <div style={{fontFamily:'Joane Stencil', fontSize:22, fontWeight:500, marginTop:4}}>Siobhán Murphy</div>
-                <div style={{fontFamily:'TT Norms Pro', fontSize:13, color:'var(--ink-soft)', marginTop:2}}>Lives 6km away · meets guests on arrival · cares for this building.</div>
+                <div style={{fontFamily:'TT Norms Pro', fontSize:14, lineHeight:1.6, color:'var(--ink-soft)', marginTop:6, maxWidth:560}}>Siobhán has looked after this building for nine years. She lives nearby, meets every guest on arrival, and knows the headland better than anyone — ask her where to find the best swim.</div>
               </div>
-              <a className="btn btn--ghost btn--sm">Contact</a>
+              <a className="btn btn--ghost btn--sm" onClick={()=>setPage('team')}>Meet the team →</a>
             </div>
           </div>
 
@@ -2701,6 +2817,7 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
               <a onClick={()=>setPage('stay')} style={{textDecoration:'underline'}}>How to book</a> · <a onClick={()=>setPage('faqs')} style={{textDecoration:'underline'}}>FAQs</a><br/>
               <a onClick={()=>setPage('stay')} style={{textDecoration:'underline'}}>Booking conditions</a> · <a onClick={()=>setPage('gift')} style={{textDecoration:'underline'}}>Use a gift voucher</a>
             </div>
+            <PropMap p={p}/>
           </aside>
         </div>
       </section>
@@ -3007,7 +3124,7 @@ function ProjectsPageV3({ setPage }) {
     <div>
       <PageTop crumb="Support & Learn · Projects" eyebrow="Rolling restoration programme"
         title={<>Rescuing, <em className="di">one roof at a time.</em></>}
-        lede="Some buildings are mid-restoration right now; others are fully recovered and let as holidays — their income feeds the next rescue."
+        lede="Some buildings are mid-restoration right now; others are fully recovered and let as holidays — their income feeds the next building we save."
         dark/>
 
       <section className="section">
@@ -3113,12 +3230,11 @@ function ProjectDetailV3({ projectId='saunderscourt', setPage }) {
         <div className="wrap">
           <div className="two-col" style={{marginBottom:80}}>
             <div>
-              <div className="eyebrow" style={{color:'var(--terracotta)'}}>Road to launch</div>
-              <h2 className="display" style={{fontSize:44, margin:'16px 0 0'}}>The plan, <em className="di">in plain English.</em></h2>
+              <h2 className="display" style={{fontSize:44, margin:'0'}}>The conservation plan.</h2>
             </div>
             <div>
               <p style={{fontFamily:'Joane Stencil', fontSize:20, lineHeight:1.6, margin:'0 0 20px'}}>We began at Saunderscourt in late 2024, working with Wexford County Council and a team of conservation specialists. The structural stabilisation is complete. What remains is the delicate part — roofs, chimneys, interiors — and it needs funding.</p>
-              <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:0}}>Once complete, both lodges will be let as self-catering holiday accommodation, with revenue ring-fenced to seed the next rescue.</p>
+              <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:0}}>Once complete, both lodges will be let as self-catering holiday accommodation, with revenue ring-fenced to seed the next building we save.</p>
             </div>
           </div>
 
@@ -3130,7 +3246,7 @@ function ProjectDetailV3({ projectId='saunderscourt', setPage }) {
                 ['c.1820','Built','Designed as matched octagonal gate lodges for the Saunders estate.'],
                 ['1910','Occupied','Census records show the head gardener\'s family in the south lodge.'],
                 ['1972','Abandoned','Both lodges fall out of use; roofs begin to fail within the decade.'],
-                ['2024','Taken on','Gifted to the Trust; emergency stabilisation begins.'],
+                ['2024','Taken on','Gifted to the Irish Landmark Trust; emergency stabilisation begins.'],
                 ['2026','Opens','Projected opening for the first holiday guests — date depends on funding.'],
               ].map(([y,t,c])=>(
                 <div key={y}>
@@ -3178,20 +3294,11 @@ function ProjectDetailV3({ projectId='saunderscourt', setPage }) {
             </div>
 
             <div style={{background:'var(--cream-warm)', border:'1px solid var(--line-warm)', borderRadius:14, padding:40}}>
-              <div className="eyebrow" style={{color:'var(--terracotta)', marginBottom:16}}>Donor recognition</div>
-              <div>
-                {[
-                  ['Keystone','€50,000+','The Heritage Council · Private donor'],
-                  ['Lintel','€10,000–€49,999',"O'Brien Family Trust · M. Kenny"],
-                  ['Threshold','€2,500–€9,999','Eight donors listed in annual report'],
-                  ['Landmarker','€250–€2,499','Published annually with consent'],
-                ].map(([t,b,l])=>(
-                  <div key={t} className="donor-row">
-                    <div className="tier">{t}</div>
-                    <div className="band">{b}</div>
-                    <div className="listed">{l}</div>
-                  </div>
-                ))}
+              <div className="eyebrow" style={{color:'var(--terracotta)', marginBottom:20}}>With thanks to our supporters</div>
+              <div className="donor-tiers">
+                <p className="donor-tier donor-tier--1">The Heritage Council · The O'Brien Family Trust · M. Kenny</p>
+                <p className="donor-tier donor-tier--2">Aoife &amp; Liam Doyle · The Walsh Foundation · S. Murphy · Coastal Friends of Saunderscourt · R. Nolan</p>
+                <p className="donor-tier donor-tier--3">…and the many individual donors and Friends of Saunderscourt who give what they can. All supporters published annually, with consent.</p>
               </div>
               <div style={{display:'flex', gap:10, marginTop:20}}>
                 <a className="btn btn--dark btn--sm" onClick={()=>setPage('donate')}>Donate →</a>
@@ -3229,10 +3336,9 @@ function ProjectDetailV3({ projectId='saunderscourt', setPage }) {
 function AboutPageV3({ setPage }) {
   return (
     <div>
-      <PageTop crumb="About us · Our story" eyebrow="Since 1992"
+      <PageTop bgImage="assets/stays/p5.jpg" eyebrow="Since 1992"
         title={<>Saved, <em className="di">shared</em>, sustained.</>}
-        lede="A charity with a simple idea: if we let the building pay for its own rescue, the rescue doesn't end."
-        dark/>
+        lede="A charity with a simple idea: if we let the building pay for its own conservation, the work doesn't end."/>
 
       <section className="section">
         <div className="wrap">
@@ -3242,7 +3348,7 @@ function AboutPageV3({ setPage }) {
               <h2 className="display" style={{fontSize:50, margin:'16px 0 0'}}>Thirty-four <em className="di">years</em> in.</h2>
             </div>
             <div>
-              <p style={{fontFamily:'Joane Stencil', fontSize:22, lineHeight:1.55, margin:'0 0 20px'}}>We were set up as an independent charity to rescue buildings that were too small to qualify for state funding and too specific to fit into the commercial market. Gate lodges. Schoolhouses. Lighthouse keepers' cottages.</p>
+              <p style={{fontFamily:'Joane Stencil', fontSize:22, lineHeight:1.55, margin:'0 0 20px'}}>We were set up as an independent charity to save buildings that were too small to qualify for state funding and too specific to fit into the commercial market. Gate lodges. Schoolhouses. Lighthouse keepers' cottages.</p>
               <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:'0 0 20px'}}>The model has stayed the same for over three decades. We take on a building, restore it using traditional materials and local craftspeople, and then let it as self-catering holiday accommodation. Guests become part of the conservation story.</p>
               <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:0}}>Today we care for 33 buildings. Our work is guided by four principles: <strong>Built Heritage</strong>, <strong>Conservation</strong>, <strong>Education</strong>, <strong>Sustainable Tourism</strong>.</p>
             </div>
@@ -3414,8 +3520,17 @@ function DonatePageV3({ setPage }) {
         <div>
           <div className="eyebrow" style={{color:'var(--terracotta)'}}>Support & Learn</div>
           <h1 className="display" style={{fontSize:110, lineHeight:.95, margin:'14px 0 20px', fontWeight:400, letterSpacing:'-.02em'}}>Give the past <em className="di">a future</em>.</h1>
-          <p style={{fontFamily:'meno-banner', fontWeight: 400, fontSize:22, opacity:.88, margin:0, maxWidth:560}}>100% of donations go directly into restoration. Saunderscourt is our current priority.</p>
-          <a onClick={()=>setPage('projects')} style={{fontFamily:'TT Norms Pro', fontSize:12, fontWeight:600, color:'var(--cream)', borderBottom:'1px solid var(--cream)', paddingBottom:2, marginTop:28, display:'inline-block'}}>See current projects →</a>
+          <p style={{fontFamily:'meno-banner', fontWeight: 400, fontSize:22, opacity:.88, margin:0, maxWidth:560}}>100% of donations go directly into conservation. Saunderscourt is our current priority.</p>
+          {/* Current project — called out as a card, not a small link */}
+          <a onClick={()=>setPage('project',{projectId:'saunderscourt'})} className="donate-project">
+            <div className="donate-project__img"><img src="assets/img-6.jpg" alt="Saunderscourt"/></div>
+            <div className="donate-project__body">
+              <div className="eyebrow" style={{color:'var(--mint)'}}>Current project · 42% funded</div>
+              <h3>Saunderscourt Gate Lodges</h3>
+              <div className="donate-project__bar"><span style={{width:'42%'}}/></div>
+              <span className="donate-project__link">Follow the project →</span>
+            </div>
+          </a>
         </div>
         <div style={{background:'var(--cream)', color:'var(--ink)', borderRadius:18, padding:48}}>
           <div className="eyebrow" style={{color:'var(--terracotta)', marginBottom:12}}>Make a donation</div>
@@ -3533,8 +3648,8 @@ function StoriesPageV3({ setPage }) {
   return (
     <div>
       <PageTop crumb="Stories & News" eyebrow="The journal"
-        title={<>Stories from <em className="di">the buildings</em>.</>}
-        lede="Itineraries, dog-friendly routes, lighthouse weeks, project updates — written by the people who stay."/>
+        title={<>Stories &amp; <em className="di">news</em>.</>}
+        lede="Itineraries, dog-friendly routes, lighthouse weeks and project updates."/>
       <div style={{background:'var(--cream)', borderBottom:'1px solid var(--line-warm)', padding:'24px 0'}}>
         <div className="wrap" style={{display:'flex', gap:8, flexWrap:'wrap'}}>
           {cats.map((c,i)=>(<button key={c} className={'pill '+(active===i?'is-active':'')} onClick={()=>setActive(i)}>{c}</button>))}
@@ -3573,11 +3688,7 @@ function StoryDetailV3({ slug='dog-friendly-sligo', setPage }) {
           <h1>{story.title}</h1>
           <p className="article-dek">{story.dek}</p>
           <div className="article-byline">
-            <div className="article-byline__av"/>
-            <div>
-              <div className="article-byline__name">By {story.author}</div>
-              <div className="article-byline__meta">{story.date} · {story.read} min read</div>
-            </div>
+            <div className="article-byline__meta">{story.date} · {story.read} min read</div>
           </div>
         </div>
       </section>
@@ -3591,7 +3702,7 @@ function StoryDetailV3({ slug='dog-friendly-sligo', setPage }) {
 
         <p>There is a particular kind of quiet you only find in a building that has stood for two hundred years. It settles over you in the first hour — a sense that the walls have seen more weather than you ever will, and intend to see plenty more. {topic} begins, as most of our favourite stays do, with that quiet.</p>
 
-        <p>The Irish Landmark Trust looks after places the wider world had nearly given up on: lightkeepers’ houses on exposed headlands, gate lodges no bigger than a generous sitting room, schoolhouses and mills and follies. Each one was rescued because it was worth rescuing, restored with traditional materials and trades, and then — crucially — opened up so people can actually stay in it. This is one of those stories.</p>
+        <p>The Irish Landmark Trust looks after places the wider world had nearly given up on: lightkeepers’ houses on exposed headlands, gate lodges no bigger than a generous sitting room, schoolhouses and mills and follies. Each one was saved because it was worth saving, restored with traditional materials and trades, and then — crucially — opened up so people can actually stay in it. This is one of those stories.</p>
 
         <h2>Why it’s worth the trip</h2>
         <p>Lorem ipsum aside, the appeal here is genuinely simple. You get a building with a real past, a setting most hotels would sell their lobby for, and the rare luxury of having the whole place to yourself. No corridors, no key cards, no breakfast buffet — just a front door that is, for a few nights, entirely yours.</p>
@@ -3607,7 +3718,7 @@ function StoryDetailV3({ slug='dog-friendly-sligo', setPage }) {
           <li>Two-night minimum stays, with longer weeks rewarding the slow traveller.</li>
         </ul>
 
-        <p>Every booking does double duty: it gives you somewhere extraordinary to sleep, and it funds the next rescue. The income from stays like this one is quite literally how the next roof goes back on. It is, we think, the most enjoyable way anyone has ever supported a building conservation charity.</p>
+        <p>Every booking does double duty: it gives you somewhere extraordinary to sleep, and it funds the next building we save. The income from stays like this one is quite literally how the next roof goes back on. It is, we think, the most enjoyable way anyone has ever supported a building conservation charity.</p>
 
         <h2>Before you go</h2>
         <p>Pack layers, charge nothing in particular, and leave a little room in the schedule for doing absolutely nothing. The best part of {topic} is rarely on the itinerary — it’s the second cup of tea by the window while the weather does something dramatic outside.</p>

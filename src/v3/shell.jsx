@@ -89,7 +89,7 @@ const NAV = [
     feature: {
       img: 'assets/img-5.jpg', tag: 'About us', eyebrow: 'Charity Reg. 20028909 (ROI) · NIC101205 (NI)',
       title: "An all-island charity since 1992",
-      copy: "We restore buildings too small for the state and too specific for the market — and let them as holidays to fund the next rescue.",
+      copy: "We restore buildings too small for the state and too specific for the market — and let them as holidays to fund the next building we save.",
       cta: 'Our story', page: 'about'
     }
   },
@@ -301,6 +301,10 @@ function FooterV3({ setPage }) {
             <a className="btn btn--accent btn--sm" onClick={()=>setPage('donate')}>Donate Now <span className="arr">→</span></a>
           </div>
         </div>
+        <div className="f__funder">
+          <span className="f__funder-label">Supported by</span>
+          <span className="f__funder-logo">An&nbsp;Chomhairle&nbsp;Oidhreachta · The&nbsp;Heritage&nbsp;Council</span>
+        </div>
         <div className="f__bottom">
           <div>Privacy &nbsp;|&nbsp; Terms &nbsp;|&nbsp; Cookies &nbsp;|&nbsp; Accessibility &nbsp;|&nbsp; <a onClick={()=>setPage('contact')}>Contact Us</a></div>
           <div className="socials">
@@ -332,9 +336,9 @@ function Prop({ p, onClick, onImageClick }) {
         </div>
         <div className="prop__loc">{p.location}</div>
         <div className="prop__meta">
+          <span>{p.tag}</span>
           <span>Sleeps {p.sleeps}</span>
           <span>{p.bedrooms} bed{p.bedrooms>1?'s':''}</span>
-          <span>2-night min</span>
         </div>
       </div>
     </a>

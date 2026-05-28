@@ -6,7 +6,7 @@ function ProjectsPageV3({ setPage }) {
     <div>
       <PageTop crumb="Support & Learn · Projects" eyebrow="Rolling restoration programme"
         title={<>Rescuing, <em className="di">one roof at a time.</em></>}
-        lede="Some buildings are mid-restoration right now; others are fully recovered and let as holidays — their income feeds the next rescue."
+        lede="Some buildings are mid-restoration right now; others are fully recovered and let as holidays — their income feeds the next building we save."
         dark/>
 
       <section className="section">
@@ -112,12 +112,11 @@ function ProjectDetailV3({ projectId='saunderscourt', setPage }) {
         <div className="wrap">
           <div className="two-col" style={{marginBottom:80}}>
             <div>
-              <div className="eyebrow" style={{color:'var(--terracotta)'}}>Road to launch</div>
-              <h2 className="display" style={{fontSize:44, margin:'16px 0 0'}}>The plan, <em className="di">in plain English.</em></h2>
+              <h2 className="display" style={{fontSize:44, margin:'0'}}>The conservation plan.</h2>
             </div>
             <div>
               <p style={{fontFamily:'Joane Stencil', fontSize:20, lineHeight:1.6, margin:'0 0 20px'}}>We began at Saunderscourt in late 2024, working with Wexford County Council and a team of conservation specialists. The structural stabilisation is complete. What remains is the delicate part — roofs, chimneys, interiors — and it needs funding.</p>
-              <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:0}}>Once complete, both lodges will be let as self-catering holiday accommodation, with revenue ring-fenced to seed the next rescue.</p>
+              <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:0}}>Once complete, both lodges will be let as self-catering holiday accommodation, with revenue ring-fenced to seed the next building we save.</p>
             </div>
           </div>
 
@@ -129,7 +128,7 @@ function ProjectDetailV3({ projectId='saunderscourt', setPage }) {
                 ['c.1820','Built','Designed as matched octagonal gate lodges for the Saunders estate.'],
                 ['1910','Occupied','Census records show the head gardener\'s family in the south lodge.'],
                 ['1972','Abandoned','Both lodges fall out of use; roofs begin to fail within the decade.'],
-                ['2024','Taken on','Gifted to the Trust; emergency stabilisation begins.'],
+                ['2024','Taken on','Gifted to the Irish Landmark Trust; emergency stabilisation begins.'],
                 ['2026','Opens','Projected opening for the first holiday guests — date depends on funding.'],
               ].map(([y,t,c])=>(
                 <div key={y}>
@@ -177,20 +176,11 @@ function ProjectDetailV3({ projectId='saunderscourt', setPage }) {
             </div>
 
             <div style={{background:'var(--cream-warm)', border:'1px solid var(--line-warm)', borderRadius:14, padding:40}}>
-              <div className="eyebrow" style={{color:'var(--terracotta)', marginBottom:16}}>Donor recognition</div>
-              <div>
-                {[
-                  ['Keystone','€50,000+','The Heritage Council · Private donor'],
-                  ['Lintel','€10,000–€49,999',"O'Brien Family Trust · M. Kenny"],
-                  ['Threshold','€2,500–€9,999','Eight donors listed in annual report'],
-                  ['Landmarker','€250–€2,499','Published annually with consent'],
-                ].map(([t,b,l])=>(
-                  <div key={t} className="donor-row">
-                    <div className="tier">{t}</div>
-                    <div className="band">{b}</div>
-                    <div className="listed">{l}</div>
-                  </div>
-                ))}
+              <div className="eyebrow" style={{color:'var(--terracotta)', marginBottom:20}}>With thanks to our supporters</div>
+              <div className="donor-tiers">
+                <p className="donor-tier donor-tier--1">The Heritage Council · The O'Brien Family Trust · M. Kenny</p>
+                <p className="donor-tier donor-tier--2">Aoife &amp; Liam Doyle · The Walsh Foundation · S. Murphy · Coastal Friends of Saunderscourt · R. Nolan</p>
+                <p className="donor-tier donor-tier--3">…and the many individual donors and Friends of Saunderscourt who give what they can. All supporters published annually, with consent.</p>
               </div>
               <div style={{display:'flex', gap:10, marginTop:20}}>
                 <a className="btn btn--dark btn--sm" onClick={()=>setPage('donate')}>Donate →</a>
@@ -228,10 +218,9 @@ function ProjectDetailV3({ projectId='saunderscourt', setPage }) {
 function AboutPageV3({ setPage }) {
   return (
     <div>
-      <PageTop crumb="About us · Our story" eyebrow="Since 1992"
+      <PageTop bgImage="assets/stays/p5.jpg" eyebrow="Since 1992"
         title={<>Saved, <em className="di">shared</em>, sustained.</>}
-        lede="A charity with a simple idea: if we let the building pay for its own rescue, the rescue doesn't end."
-        dark/>
+        lede="A charity with a simple idea: if we let the building pay for its own conservation, the work doesn't end."/>
 
       <section className="section">
         <div className="wrap">
@@ -241,7 +230,7 @@ function AboutPageV3({ setPage }) {
               <h2 className="display" style={{fontSize:50, margin:'16px 0 0'}}>Thirty-four <em className="di">years</em> in.</h2>
             </div>
             <div>
-              <p style={{fontFamily:'Joane Stencil', fontSize:22, lineHeight:1.55, margin:'0 0 20px'}}>We were set up as an independent charity to rescue buildings that were too small to qualify for state funding and too specific to fit into the commercial market. Gate lodges. Schoolhouses. Lighthouse keepers' cottages.</p>
+              <p style={{fontFamily:'Joane Stencil', fontSize:22, lineHeight:1.55, margin:'0 0 20px'}}>We were set up as an independent charity to save buildings that were too small to qualify for state funding and too specific to fit into the commercial market. Gate lodges. Schoolhouses. Lighthouse keepers' cottages.</p>
               <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:'0 0 20px'}}>The model has stayed the same for over three decades. We take on a building, restore it using traditional materials and local craftspeople, and then let it as self-catering holiday accommodation. Guests become part of the conservation story.</p>
               <p style={{fontFamily:'TT Norms Pro', fontSize:15, lineHeight:1.75, color:'var(--ink-soft)', margin:0}}>Today we care for 33 buildings. Our work is guided by four principles: <strong>Built Heritage</strong>, <strong>Conservation</strong>, <strong>Education</strong>, <strong>Sustainable Tourism</strong>.</p>
             </div>
@@ -413,8 +402,17 @@ function DonatePageV3({ setPage }) {
         <div>
           <div className="eyebrow" style={{color:'var(--terracotta)'}}>Support & Learn</div>
           <h1 className="display" style={{fontSize:110, lineHeight:.95, margin:'14px 0 20px', fontWeight:400, letterSpacing:'-.02em'}}>Give the past <em className="di">a future</em>.</h1>
-          <p style={{fontFamily:'meno-banner', fontWeight: 400, fontSize:22, opacity:.88, margin:0, maxWidth:560}}>100% of donations go directly into restoration. Saunderscourt is our current priority.</p>
-          <a onClick={()=>setPage('projects')} style={{fontFamily:'TT Norms Pro', fontSize:12, fontWeight:600, color:'var(--cream)', borderBottom:'1px solid var(--cream)', paddingBottom:2, marginTop:28, display:'inline-block'}}>See current projects →</a>
+          <p style={{fontFamily:'meno-banner', fontWeight: 400, fontSize:22, opacity:.88, margin:0, maxWidth:560}}>100% of donations go directly into conservation. Saunderscourt is our current priority.</p>
+          {/* Current project — called out as a card, not a small link */}
+          <a onClick={()=>setPage('project',{projectId:'saunderscourt'})} className="donate-project">
+            <div className="donate-project__img"><img src="assets/img-6.jpg" alt="Saunderscourt"/></div>
+            <div className="donate-project__body">
+              <div className="eyebrow" style={{color:'var(--mint)'}}>Current project · 42% funded</div>
+              <h3>Saunderscourt Gate Lodges</h3>
+              <div className="donate-project__bar"><span style={{width:'42%'}}/></div>
+              <span className="donate-project__link">Follow the project →</span>
+            </div>
+          </a>
         </div>
         <div style={{background:'var(--cream)', color:'var(--ink)', borderRadius:18, padding:48}}>
           <div className="eyebrow" style={{color:'var(--terracotta)', marginBottom:12}}>Make a donation</div>
@@ -532,8 +530,8 @@ function StoriesPageV3({ setPage }) {
   return (
     <div>
       <PageTop crumb="Stories & News" eyebrow="The journal"
-        title={<>Stories from <em className="di">the buildings</em>.</>}
-        lede="Itineraries, dog-friendly routes, lighthouse weeks, project updates — written by the people who stay."/>
+        title={<>Stories &amp; <em className="di">news</em>.</>}
+        lede="Itineraries, dog-friendly routes, lighthouse weeks and project updates."/>
       <div style={{background:'var(--cream)', borderBottom:'1px solid var(--line-warm)', padding:'24px 0'}}>
         <div className="wrap" style={{display:'flex', gap:8, flexWrap:'wrap'}}>
           {cats.map((c,i)=>(<button key={c} className={'pill '+(active===i?'is-active':'')} onClick={()=>setActive(i)}>{c}</button>))}
@@ -572,11 +570,7 @@ function StoryDetailV3({ slug='dog-friendly-sligo', setPage }) {
           <h1>{story.title}</h1>
           <p className="article-dek">{story.dek}</p>
           <div className="article-byline">
-            <div className="article-byline__av"/>
-            <div>
-              <div className="article-byline__name">By {story.author}</div>
-              <div className="article-byline__meta">{story.date} · {story.read} min read</div>
-            </div>
+            <div className="article-byline__meta">{story.date} · {story.read} min read</div>
           </div>
         </div>
       </section>
@@ -590,7 +584,7 @@ function StoryDetailV3({ slug='dog-friendly-sligo', setPage }) {
 
         <p>There is a particular kind of quiet you only find in a building that has stood for two hundred years. It settles over you in the first hour — a sense that the walls have seen more weather than you ever will, and intend to see plenty more. {topic} begins, as most of our favourite stays do, with that quiet.</p>
 
-        <p>The Irish Landmark Trust looks after places the wider world had nearly given up on: lightkeepers’ houses on exposed headlands, gate lodges no bigger than a generous sitting room, schoolhouses and mills and follies. Each one was rescued because it was worth rescuing, restored with traditional materials and trades, and then — crucially — opened up so people can actually stay in it. This is one of those stories.</p>
+        <p>The Irish Landmark Trust looks after places the wider world had nearly given up on: lightkeepers’ houses on exposed headlands, gate lodges no bigger than a generous sitting room, schoolhouses and mills and follies. Each one was saved because it was worth saving, restored with traditional materials and trades, and then — crucially — opened up so people can actually stay in it. This is one of those stories.</p>
 
         <h2>Why it’s worth the trip</h2>
         <p>Lorem ipsum aside, the appeal here is genuinely simple. You get a building with a real past, a setting most hotels would sell their lobby for, and the rare luxury of having the whole place to yourself. No corridors, no key cards, no breakfast buffet — just a front door that is, for a few nights, entirely yours.</p>
@@ -606,7 +600,7 @@ function StoryDetailV3({ slug='dog-friendly-sligo', setPage }) {
           <li>Two-night minimum stays, with longer weeks rewarding the slow traveller.</li>
         </ul>
 
-        <p>Every booking does double duty: it gives you somewhere extraordinary to sleep, and it funds the next rescue. The income from stays like this one is quite literally how the next roof goes back on. It is, we think, the most enjoyable way anyone has ever supported a building conservation charity.</p>
+        <p>Every booking does double duty: it gives you somewhere extraordinary to sleep, and it funds the next building we save. The income from stays like this one is quite literally how the next roof goes back on. It is, we think, the most enjoyable way anyone has ever supported a building conservation charity.</p>
 
         <h2>Before you go</h2>
         <p>Pack layers, charge nothing in particular, and leave a little room in the schedule for doing absolutely nothing. The best part of {topic} is rarely on the itinerary — it’s the second cup of tea by the window while the weather does something dramatic outside.</p>
