@@ -5,6 +5,8 @@
 <title>Irish Landmark Trust — v3 Full Site</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" href="https://use.typekit.net/vje6fkm.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* Irish Landmark Trust — v3 design system
    Brand: PANTONE 357 deep green + PANTONE 486 terracotta + sage / mint / cream
@@ -647,6 +649,14 @@ footer.f { background: var(--green-deep); color: var(--cream); padding: 90px 0 1
 .lightbox__nav:hover { background:rgba(251,248,246,.28); }
 .lightbox__nav--prev { left:-70px; } .lightbox__nav--next { right:-70px; }
 .lightbox__cap { color:var(--cream); font-family:"TT Norms Pro"; font-size:13px; letter-spacing:.16em; text-transform:uppercase; margin-top:18px; text-align:center; opacity:.85; }
+.lightbox__dots { display:flex; gap:8px; justify-content:center; margin-top:14px; }
+.lightbox__dot { width:8px; height:8px; border-radius:50%; border:none; background:rgba(251,248,246,.35); cursor:pointer; padding:0; transition:background .15s ease, transform .15s ease; }
+.lightbox__dot.is-on { background:var(--cream); transform:scale(1.25); }
+/* pd-gallery: clickable images + view-all button */
+.pd-gallery { position:relative; }
+.pd-gallery img { cursor:zoom-in; }
+.pd-gallery__all { position:absolute; right:14px; bottom:14px; z-index:2; background:rgba(26,60,52,.85); color:var(--cream); border:none; backdrop-filter:blur(4px); font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.1em; text-transform:uppercase; padding:9px 14px; cursor:pointer; }
+.pd-gallery__all:hover { background:var(--green-deep); }
 @media (max-width: 1140px) { .lightbox__nav--prev { left:10px; } .lightbox__nav--next { right:10px; } }
 
 /* ─── Inner pages: top hero pattern ─── */
@@ -729,8 +739,12 @@ footer.f { background: var(--green-deep); color: var(--cream); padding: 90px 0 1
 .prop-map { margin-top:20px; padding-top:20px; border-top:1px solid var(--line-warm); }
 .prop-map__head { font-family:"TT Norms Pro"; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage); margin-bottom:12px; display:flex; justify-content:space-between; gap:10px; }
 .prop-map__head span { letter-spacing:.02em; text-transform:none; color:var(--ink-soft); }
-.prop-map__frame { aspect-ratio:4/3; overflow:hidden; border:1px solid var(--line-warm); background:var(--mint-soft); }
+.prop-map__frame { aspect-ratio:4/3; overflow:hidden; border:1px solid var(--line-warm); background:#eef0ea; }
 .prop-map__frame iframe { width:100%; height:100%; display:block; }
+.prop-map .leaflet-container { width:100%; height:100%; background:#eef0ea; font-family:"TT Norms Pro"; }
+/* Clean 2-colour: mute the tile palette slightly toward the brand neutral */
+.prop-map .leaflet-tile-pane { filter: grayscale(.4) brightness(1.02); }
+.prop-pin span { display:block; width:18px; height:18px; border-radius:50%; background:var(--terracotta); border:3px solid var(--cream); box-shadow:0 2px 6px rgba(26,60,52,.4); }
 .prop-map__link { display:inline-block; margin-top:10px; font-family:"TT Norms Pro"; font-size:13px; font-weight:600; color:var(--green-deep); border-bottom:1px solid var(--green-deep); padding-bottom:2px; }
 
 /* Property fullscreen hero */
@@ -2304,20 +2318,30 @@ function BookingCalendar({ propId, name, onBook }) {
   );
 }
 
-// ─── Interactive location map (OpenStreetMap embed, pinned) ─────────────────
+// ─── Interactive location map — Leaflet + clean 2-colour CARTO tiles ────────
 function PropMap({ p }) {
+  const ref = React.useRef(null);
+  const [lat, lng] = p.coords || [];
+  React.useEffect(() => {
+    if (!p.coords || !window.L || !ref.current) return;
+    const map = window.L.map(ref.current, { scrollWheelZoom:false, attributionControl:false }).setView([lat, lng], 11);
+    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19, subdomains: 'abcd',
+    }).addTo(map);
+    // Brand-green circular pin
+    window.L.marker([lat, lng], {
+      icon: window.L.divIcon({ className:'prop-pin', html:'<span></span>', iconSize:[18,18], iconAnchor:[9,9] })
+    }).addTo(map);
+    map.getContainer().addEventListener('click', () => map.scrollWheelZoom.enable());
+    return () => map.remove();
+  }, [p.id]);
+
   if (!p.coords) return null;
-  const [lat, lng] = p.coords;
-  const d = 0.06; // bbox padding in degrees
-  const bbox = `${(lng-d).toFixed(4)},${(lat-d).toFixed(4)},${(lng+d).toFixed(4)},${(lat+d).toFixed(4)}`;
-  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
   const big = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=13/${lat}/${lng}`;
   return (
     <div className="prop-map">
       <div className="prop-map__head">Location <span>{p.location}</span></div>
-      <div className="prop-map__frame">
-        <iframe title={`Map of ${p.name}`} src={src} loading="lazy" style={{border:0}}></iframe>
-      </div>
+      <div className="prop-map__frame" ref={ref}></div>
       <a className="prop-map__link" href={big} target="_blank" rel="noopener">Open larger map →</a>
     </div>
   );
@@ -2514,7 +2538,7 @@ function PropertiesPageV3({ setPage, openProp }) {
         </div>
       </section>
 
-      {gallery && <PropGallery p={gallery} onClose={()=>setGallery(null)}/>}
+      {lightbox !== null && <PropGallery p={p} start={lightbox} onClose={()=>setLightbox(null)}/>}
     </div>
   );
 }
@@ -2629,6 +2653,7 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
   const D = window.ILT_DATA;
   const p = D.props.find(x=>x.id===id) || D.props[0];
   const [tab, setTab] = uS('about');
+  const [lightbox, setLightbox] = uS(null);   // image index, or null
   const primaryCat = D.categories.find(c=>c.id===p.categories[0]) || D.categories[0];
   const similar = D.props.filter(x => x.id!==p.id && x.categories.some(c=>p.categories.includes(c))).slice(0,3);
 
@@ -2660,11 +2685,10 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
       <section style={{padding:'40px 0 0', background:'var(--cream)'}}>
         <div className="wrap">
           <div className="pd-gallery">
-            <img src={pick(p.id, 0)} alt={p.name}/>
-            <img src={pick(p.id, 1)} alt=""/>
-            <img src={pick(p.id, 2)} alt=""/>
-            <img src={pick(p.id, 3)} alt=""/>
-            <img src={pick(p.id, 4)} alt=""/>
+            {[0,1,2,3,4].map(n => (
+              <img key={n} src={pick(p.id, n)} alt={n===0?p.name:''} onClick={()=>setLightbox(n)}/>
+            ))}
+            <button className="pd-gallery__all" onClick={()=>setLightbox(0)}>⊕ View gallery</button>
           </div>
         </div>
       </section>

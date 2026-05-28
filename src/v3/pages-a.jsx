@@ -79,20 +79,30 @@ function BookingCalendar({ propId, name, onBook }) {
   );
 }
 
-// ─── Interactive location map (OpenStreetMap embed, pinned) ─────────────────
+// ─── Interactive location map — Leaflet + clean 2-colour CARTO tiles ────────
 function PropMap({ p }) {
+  const ref = React.useRef(null);
+  const [lat, lng] = p.coords || [];
+  React.useEffect(() => {
+    if (!p.coords || !window.L || !ref.current) return;
+    const map = window.L.map(ref.current, { scrollWheelZoom:false, attributionControl:false }).setView([lat, lng], 11);
+    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19, subdomains: 'abcd',
+    }).addTo(map);
+    // Brand-green circular pin
+    window.L.marker([lat, lng], {
+      icon: window.L.divIcon({ className:'prop-pin', html:'<span></span>', iconSize:[18,18], iconAnchor:[9,9] })
+    }).addTo(map);
+    map.getContainer().addEventListener('click', () => map.scrollWheelZoom.enable());
+    return () => map.remove();
+  }, [p.id]);
+
   if (!p.coords) return null;
-  const [lat, lng] = p.coords;
-  const d = 0.06; // bbox padding in degrees
-  const bbox = `${(lng-d).toFixed(4)},${(lat-d).toFixed(4)},${(lng+d).toFixed(4)},${(lat+d).toFixed(4)}`;
-  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
   const big = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=13/${lat}/${lng}`;
   return (
     <div className="prop-map">
       <div className="prop-map__head">Location <span>{p.location}</span></div>
-      <div className="prop-map__frame">
-        <iframe title={`Map of ${p.name}`} src={src} loading="lazy" style={{border:0}}></iframe>
-      </div>
+      <div className="prop-map__frame" ref={ref}></div>
       <a className="prop-map__link" href={big} target="_blank" rel="noopener">Open larger map →</a>
     </div>
   );
@@ -289,7 +299,7 @@ function PropertiesPageV3({ setPage, openProp }) {
         </div>
       </section>
 
-      {gallery && <PropGallery p={gallery} onClose={()=>setGallery(null)}/>}
+      {lightbox !== null && <PropGallery p={p} start={lightbox} onClose={()=>setLightbox(null)}/>}
     </div>
   );
 }
@@ -404,6 +414,7 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
   const D = window.ILT_DATA;
   const p = D.props.find(x=>x.id===id) || D.props[0];
   const [tab, setTab] = uS('about');
+  const [lightbox, setLightbox] = uS(null);   // image index, or null
   const primaryCat = D.categories.find(c=>c.id===p.categories[0]) || D.categories[0];
   const similar = D.props.filter(x => x.id!==p.id && x.categories.some(c=>p.categories.includes(c))).slice(0,3);
 
@@ -435,11 +446,10 @@ function PropertyDetailV3({ id='galley-keepers', setPage, openProp }) {
       <section style={{padding:'40px 0 0', background:'var(--cream)'}}>
         <div className="wrap">
           <div className="pd-gallery">
-            <img src={pick(p.id, 0)} alt={p.name}/>
-            <img src={pick(p.id, 1)} alt=""/>
-            <img src={pick(p.id, 2)} alt=""/>
-            <img src={pick(p.id, 3)} alt=""/>
-            <img src={pick(p.id, 4)} alt=""/>
+            {[0,1,2,3,4].map(n => (
+              <img key={n} src={pick(p.id, n)} alt={n===0?p.name:''} onClick={()=>setLightbox(n)}/>
+            ))}
+            <button className="pd-gallery__all" onClick={()=>setLightbox(0)}>⊕ View gallery</button>
           </div>
         </div>
       </section>
