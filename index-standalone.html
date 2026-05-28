@@ -2381,9 +2381,10 @@ function PageTop({ crumb, eyebrow, title, lede, dark = false, action, bgImage })
 }
 
 // ─── Property image gallery lightbox ────────────────────────────────────────
-function PropGallery({ p, onClose }) {
+function PropGallery({ p, start = 0, onClose }) {
   const imgs = [0,1,2,3,4].map(o => pick(p.id, o));
-  const [i, setI] = uS(0);
+  const [i, setI] = uS(typeof start === 'number' ? start : 0);
+  const touch = React.useRef(null);
   const prev = () => setI(v => (v - 1 + imgs.length) % imgs.length);
   const next = () => setI(v => (v + 1) % imgs.length);
   React.useEffect(() => {
@@ -2392,14 +2393,24 @@ function PropGallery({ p, onClose }) {
     window.addEventListener('keydown', onKey);
     return () => { document.body.classList.remove('no-scroll'); window.removeEventListener('keydown', onKey); };
   }, []);
+  const onTouchStart = (e) => { touch.current = e.touches[0].clientX; };
+  const onTouchEnd = (e) => {
+    if (touch.current == null) return;
+    const dx = e.changedTouches[0].clientX - touch.current;
+    if (dx > 50) prev(); else if (dx < -50) next();
+    touch.current = null;
+  };
   return (
     <div className="lightbox" onClick={onClose}>
       <button className="lightbox__close" onClick={onClose} aria-label="Close">✕</button>
-      <div className="lightbox__stage" onClick={e=>e.stopPropagation()}>
+      <div className="lightbox__stage" onClick={e=>e.stopPropagation()} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <button className="lightbox__nav lightbox__nav--prev" onClick={prev} aria-label="Previous">‹</button>
         <img src={imgs[i]} alt={p.name}/>
         <button className="lightbox__nav lightbox__nav--next" onClick={next} aria-label="Next">›</button>
         <div className="lightbox__cap">{p.name} · {i+1} / {imgs.length}</div>
+        <div className="lightbox__dots">
+          {imgs.map((_,d)=>(<button key={d} className={'lightbox__dot'+(d===i?' is-on':'')} onClick={()=>setI(d)} aria-label={`Image ${d+1}`}/>))}
+        </div>
       </div>
     </div>
   );
